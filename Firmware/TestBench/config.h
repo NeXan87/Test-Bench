@@ -25,12 +25,14 @@
 #define LED4_PIN 13
 
 // Потенциометры
-#define POT_CYCLES_PIN   A0  // Количество циклов
+#define POT_CYCLES_PIN   A0  // Количество цикылов
 #define POT_DELAY2_PIN   A1  // Задержка после реле 2/4
 #define POT_ON2_PIN      A2  // Время реле 2/4
 #define POT_DELAY1_PIN   A3  // Задержка после реле 1/3
-#define POT_ON1_PIN      A6  // Время реле 1/3 ← перенесено на A6!
+#define POT_ON1_PIN      A6  // Время реле 1/3
 
+// Датчик тока
+#define CURRENT_SENSOR_PIN      A7 // Датчик постоянного тока
 
 // =============== ДИСПЛЕЙ ===============
 #define I2C_ADDR 0x20  // или 0x3F — проверьте!
@@ -52,7 +54,7 @@
 
 // =============== ЦИКЛЫ ===============
 #define MIN_CYCLES       1
-#define MAX_CYCLES       1000
+#define MAX_CYCLES       999
 #define INFINITY_THRESHOLD 1000  // analogRead() > 1000 → бесконечность
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============

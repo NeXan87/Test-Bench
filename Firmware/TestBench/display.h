@@ -14,7 +14,8 @@ void display_update(
   int mode,
   bool groupA,
   unsigned long cycleTimeMs,
-  const char* status
+  const char* status,
+  float current
 );
 
 #endif

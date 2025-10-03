@@ -4,6 +4,7 @@
 #include "app_state.h"
 #include "modes.h"
 #include "display.h"
+#include "current.h"
 
 void setup() {
   ui_init();
@@ -64,6 +65,8 @@ void loop() {
 
   static unsigned long lastDisplay = 0;
   if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
+    float current = current_readDC();
+    
     display_update(
       app_state_getRelay1Time(),
       app_state_getDelay1Time(),
@@ -75,7 +78,8 @@ void loop() {
       (int)app_state_getMode(),
       app_state_getGroupA(),
       modes_getCycleElapsedTime(),
-      modes_getStatus());
+      modes_getStatus(),
+      current);
     lastDisplay = millis();
   }
 

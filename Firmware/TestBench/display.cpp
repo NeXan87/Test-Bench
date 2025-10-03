@@ -28,7 +28,8 @@ void display_update(
   int mode,
   bool groupA,
   unsigned long cycleTimeMs,
-  const char* status) {
+  const char* status,
+  float current) {
   lcd.clear();
 
   // Строка 1: T1, D1, режим
@@ -49,12 +50,16 @@ void display_update(
   lcd.print(" G:");
   lcd.print(groupA ? "A" : "B");
 
-  // Строка 3: Циклы
+  // Строка 3: Циклы, ток
   lcd.setCursor(0, 2);
-  lcd.print("Cycle: ");
+  lcd.print("Cycl: ");
   lcd.print(currentCycle);
   lcd.print("/");
   lcd.print(infinite ? "INF" : String(totalCycles));
+  lcd.setCursor(14, 2);
+  lcd.print("I:");
+  lcd.print((int)current);
+  lcd.print("A");
 
   // Строка 4: Текущее время цикла, состояние работы
   lcd.setCursor(0, 3);
