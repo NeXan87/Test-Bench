@@ -1,4 +1,4 @@
-#Тестовый стенд для двигателей и клапанов на Arduino Nano
+# Тестовый стенд для двигателей и клапанов на Arduino Nano
 ## TestBench — Industrial Relay & Motor Tester
 
 ![Arduino Nano](https://img.shields.io/badge/Platform-Arduino_Nano-blue)
