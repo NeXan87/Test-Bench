@@ -13,6 +13,8 @@ void display_init() {
   lcd.print("TestBench v1.0");
   lcd.setCursor(0, 1);
   lcd.print("Starting...");
+  lcd.setCursor(0, 3);
+  lcd.print("FW: git.new/H3iooZv");
 }
 
 void display_clear() {
