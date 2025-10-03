@@ -1,0 +1,26 @@
+# Обработка окончаний строк для Arduino-проекта
+* text=auto eol=lf
+
+# Файлы Arduino и C/C++
+*.ino text eol=lf
+*.cpp text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+
+# Другие текстовые файлы
+*.txt text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+*.ino.cpp text eol=lf
+
+# Бинарные файлы — не трогать
+*.bin binary
+*.hex binary
+*.elf binary
+*.jpg binary
+*.png binary
+*.pdf binary
