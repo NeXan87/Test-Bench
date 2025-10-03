@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "config.h"
 
 const char* utils_formatTimeSec(unsigned long ms) {
   static char buffer[5]; // "00s\0"
@@ -11,7 +12,7 @@ const char* utils_formatCycleTime(unsigned long elapsedMs) {
   static char buffer[7]; // "MM:SS"
   
   // Максимум 99 минут 59 секунд = 5999 секунд
-  unsigned long totalSec = (elapsedMs / 1000) % 6000; // 6000 = 100*60
+  unsigned long totalSec = (elapsedMs / 1000) % MAX_DISPLAY_TIME_SEC; // 6000 = 100*60
   
   byte minutes = totalSec / 60;
   byte seconds = totalSec % 60;

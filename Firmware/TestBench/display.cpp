@@ -10,10 +10,12 @@ void display_init() {
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
-  lcd.print("TestBench v2.0");
+  lcd.print("TestBench v1.0");
   lcd.setCursor(0, 1);
   lcd.print("Starting...");
-  delay(1500);
+}
+
+void display_clear() {
   lcd.clear();
 }
 

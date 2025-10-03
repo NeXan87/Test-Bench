@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// =============== ПИНЫ ===============
 // Реле
 #define RELAY1_PIN 1
 #define RELAY2_PIN 0
@@ -30,9 +31,38 @@
 #define POT_DELAY1_PIN   A3  // Задержка после реле 1/3
 #define POT_ON1_PIN      A6  // Время реле 1/3 ← перенесено на A6!
 
-// I2C дисплей
+
+// =============== ДИСПЛЕЙ ===============
 #define I2C_ADDR 0x20  // или 0x3F — проверьте!
 #define LCD_COLS 20
 #define LCD_ROWS 4
+
+// =============== ВРЕМЕННЫЕ ДИАПАЗОНЫ (мс) ===============
+#define MIN_ON_TIME      1000   // 1 сек
+#define MAX_ON_TIME      60000  // 60 сек
+#define MIN_DELAY_TIME   0      // 0 сек (для группы A)
+#define MIN_DELAY_GROUP_B 1000  // 1 сек (для группы B и режима 4)
+#define MAX_DELAY_TIME   60000  // 60 сек
+
+// =============== КАЛИБРОВКА ТОКА ===============
+// ACS712-5A: 185 mV/A → 1023 / (5000/185) ≈ 37.85
+// ACS712-20A: 100 mV/A → ≈ 20.46
+// ACS712-30A: 66 mV/A → ≈ 13.53
+#define CURRENT_SCALE 37.85f
+
+// =============== ЦИКЛЫ ===============
+#define MIN_CYCLES       1
+#define MAX_CYCLES       1000
+#define INFINITY_THRESHOLD 1000  // analogRead() > 1000 → бесконечность
+
+// =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
+#define DISPLAY_UPDATE_INTERVAL_MS 1000   // Обновление дисплея
+#define BLINK_INTERVAL_MS          500    // Мигание при блокировке
+#define CURRENT_SAMPLES            100    // Усреднение тока
+#define STARTUP_TIMEOUT            1500    // Длительность отображения заставки при включении
+
+// =============== ОГРАНИЧЕНИЯ ===============
+#define MAX_DISPLAY_TIME_SEC       6000   // 100 минут в секундах (99:59 + 1)
+#define ADC_ZERO_OFFSET            512.0f // Середина ADC (0A для ACS712)
 
 #endif

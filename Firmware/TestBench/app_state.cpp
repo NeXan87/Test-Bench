@@ -37,12 +37,12 @@ bool app_state_readSwitches() {
 
 void app_state_update() {
   // Время включения реле: 1–60 сек
-  s_t1 = map(analogRead(POT_ON1_PIN), 0, 1023, 1000, 60000);
-  s_t2 = map(analogRead(POT_ON2_PIN), 0, 1023, 1000, 60000);
+  s_t1 = map(analogRead(POT_ON1_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
+  s_t2 = map(analogRead(POT_ON2_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
 
   // Задержка: сначала читаем "сырые" значения
-  unsigned long raw_d1 = map(analogRead(POT_DELAY1_PIN), 0, 1023, 0, 60000);
-  unsigned long raw_d2 = map(analogRead(POT_DELAY2_PIN), 0, 1023, 0, 60000);
+  unsigned long raw_d1 = map(analogRead(POT_DELAY1_PIN), 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
+  unsigned long raw_d2 = map(analogRead(POT_DELAY2_PIN), 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
 
   // Определяем, нужно ли ограничение
   bool minDelayRequired = !s_groupA; // группа B → да
@@ -57,20 +57,20 @@ void app_state_update() {
     s_d1 = raw_d1;
     s_d2 = raw_d2;
   } else {
-    s_d1 = (raw_d1 < 1000) ? 1000 : raw_d1;
-    s_d2 = (raw_d2 < 1000) ? 1000 : raw_d2;
+    s_d1 = (raw_d1 < MIN_DELAY_GROUP_B) ? MIN_DELAY_GROUP_B : raw_d1;
+    s_d2 = (raw_d2 < MIN_DELAY_GROUP_B) ? MIN_DELAY_GROUP_B : raw_d2;
   }
 
   // Потенциометр циклов
   int potCycles = analogRead(POT_CYCLES_PIN);
   potCycles = constrain(potCycles, 0, 1023);
 
-  if (potCycles > 1000) {
+  if (potCycles > INFINITY_THRESHOLD) {
     s_inf = true;
-    s_cycles = 1000;
+    s_cycles = INFINITY_THRESHOLD;
   } else {
     s_inf = false;
-    s_cycles = map(potCycles, 0, 1000, 1, 1000);  // ← 0→1, 500→500, 1000→1000
+    s_cycles = map(potCycles, 0, 1000, MIN_CYCLES, MAX_CYCLES);  // ← 0→1, 500→500, 1000→1000
   }
 }
 

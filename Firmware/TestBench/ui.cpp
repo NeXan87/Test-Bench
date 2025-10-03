@@ -28,8 +28,7 @@ void ui_runStartupAnimation() {
   digitalWrite(LED2_PIN, HIGH);
   digitalWrite(LED3_PIN, HIGH);
   digitalWrite(LED4_PIN, HIGH);
-  delay(1000);
-  ui_clearLEDs();
+  
 }
 
 void ui_updateButtons() {
@@ -65,7 +64,7 @@ void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, int mode)
 
 void ui_blinkAllLEDs() {
   static unsigned long lastToggle = 0;
-  const unsigned long interval = 500; // 0.5 сек
+  const unsigned long interval = BLINK_INTERVAL_MS;
   unsigned long now = millis();
 
   if (now - lastToggle >= interval) {

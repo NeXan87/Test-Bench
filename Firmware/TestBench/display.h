@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 void display_init();
+void display_clear();
 void display_update(
   unsigned long t1, unsigned long d1,
   unsigned long t2, unsigned long d2,

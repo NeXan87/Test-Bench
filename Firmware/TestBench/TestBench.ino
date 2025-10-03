@@ -6,12 +6,15 @@
 #include "display.h"
 
 void setup() {
-  ui_runStartupAnimation();
   ui_init();
   relays_init();
   app_state_init();
   modes_init();
+  ui_runStartupAnimation();
   display_init();
+  delay(STARTUP_TIMEOUT);
+  ui_clearLEDs();
+  display_clear();
 }
 
 void loop() {
@@ -28,20 +31,20 @@ void loop() {
   // Сброс по переключателям
   static Mode lastMode = MODE_MANUAL_BLOCKING;
   static bool lastGroup = true;
-  
+
   if (app_state_isIdle()) {
     Mode currMode = app_state_getMode();
     bool currGroup = app_state_getGroupA();
-    
+
     if (currMode != lastMode || currGroup != lastGroup) {
       if (modes_isWaitingForUserAction()) {
-        modes_resetCycleData(); 
+        modes_resetCycleData();
       }
       modes_forceIdle();
       lastMode = currMode;
       lastGroup = currGroup;
     }
-    
+
     app_state_readSwitches();
     relays_setGroup(currGroup ? GROUP_A : GROUP_B);
   }
@@ -60,7 +63,7 @@ void loop() {
   modes_run();
 
   static unsigned long lastDisplay = 0;
-  if (millis() - lastDisplay >= 1000) {
+  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
     display_update(
       app_state_getRelay1Time(),
       app_state_getDelay1Time(),
