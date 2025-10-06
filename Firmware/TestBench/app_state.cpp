@@ -36,29 +36,36 @@ bool app_state_readSwitches() {
 }
 
 void app_state_update() {
-  // Время включения реле: 1–60 сек
-  s_t1 = map(analogRead(POT_ON1_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
-  s_t2 = map(analogRead(POT_ON2_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
+  // Время включения реле: 0–60 сек
+  unsigned long raw_t1 = map(analogRead(POT_ON1_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
+  unsigned long raw_t2 = map(analogRead(POT_ON2_PIN), 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
 
   // Задержка: сначала читаем "сырые" значения
   unsigned long raw_d1 = map(analogRead(POT_DELAY1_PIN), 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
   unsigned long raw_d2 = map(analogRead(POT_DELAY2_PIN), 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
 
-  // Определяем, нужно ли ограничение
-  bool minDelayRequired = !s_groupA; // группа B → да
+  if (s_mode == MODE_SYNC_AUTO) {
+    s_t1 = (raw_t1 < 1000) ? 1000 : raw_t1;  // 1–60 сек
+    s_t2 = raw_t2;                           // 0–60 сек
+  } else {
+    // Во всех остальных режимах:
+    // - Реле 1/3 → 1–60 сек
+    // - Реле 2/4 → 1–60 сек (или 0 сек в зависимости от группы/режима)
+    s_t1 = (raw_t1 < 1000) ? 1000 : raw_t1;
 
-  // Дополнительно: режим 4 (ручной независимый) тоже требует мин. задержку
-  if (s_mode == MODE_MANUAL_INDEPENDENT) {
-    minDelayRequired = true;
+    // Для реле 2/4: 0 сек разрешено только в группе B или режиме 4
+    bool allowZeroT2 = (!s_groupA) || (s_mode == MODE_MANUAL_INDEPENDENT);
+    s_t2 = allowZeroT2 ? raw_t2 : ((raw_t2 < 1000) ? 1000 : raw_t2);
   }
 
-  // Применяем ограничение по группе
+  // Минимальная задержка 1 сек ТОЛЬКО если требуется (группа B или режим 4)
+  bool minDelayRequired = (!s_groupA) || (s_mode == MODE_ASYNC_AUTO);
   if (minDelayRequired) {
+    s_d1 = (raw_d1 < 1000) ? 1000 : raw_d1;
+    s_d2 = (raw_d2 < 1000) ? 1000 : raw_d2;
+  } else {
     s_d1 = raw_d1;
     s_d2 = raw_d2;
-  } else {
-    s_d1 = (raw_d1 < MIN_DELAY_GROUP_B) ? MIN_DELAY_GROUP_B : raw_d1;
-    s_d2 = (raw_d2 < MIN_DELAY_GROUP_B) ? MIN_DELAY_GROUP_B : raw_d2;
   }
 
   // Потенциометр циклов

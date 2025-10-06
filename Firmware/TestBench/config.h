@@ -40,7 +40,7 @@
 #define LCD_ROWS 4
 
 // =============== ВРЕМЕННЫЕ ДИАПАЗОНЫ (мс) ===============
-#define MIN_ON_TIME      1000   // 1 сек
+#define MIN_ON_TIME      0   // 1 сек
 #define MAX_ON_TIME      60000  // 60 сек
 #define MIN_DELAY_TIME   0      // 0 сек (для группы A)
 #define MIN_DELAY_GROUP_B 1000  // 1 сек (для группы B и режима 4)
@@ -58,7 +58,7 @@
 #define INFINITY_THRESHOLD 1000  // analogRead() > 1000 → бесконечность
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
-#define DISPLAY_UPDATE_INTERVAL_MS 1000   // Обновление дисплея
+#define DISPLAY_UPDATE_INTERVAL_MS 500   // Обновление дисплея
 #define BLINK_INTERVAL_MS          500    // Мигание при блокировке
 #define CURRENT_SAMPLES            100    // Усреднение тока
 #define STARTUP_TIMEOUT            1500    // Длительность отображения заставки при включении
