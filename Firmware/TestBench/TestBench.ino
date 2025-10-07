@@ -20,11 +20,44 @@ void setup() {
 
 void loop() {
   ui_updateButtons();
+
+  static unsigned long lastDisplay = 0;
+  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
+    float current = current_readDC();
+
+    display_update(
+      app_state_getRelay1Time(),
+      app_state_getDelay1Time(),
+      app_state_getRelay2Time(),
+      app_state_getDelay2Time(),
+      app_state_getCurrentCycle(),
+      app_state_getCycleLimit(),
+      app_state_getInfiniteCycles(),
+      (int)app_state_getMode(),
+      app_state_getGroupA(),
+      modes_getCycleElapsedTime(),
+      modes_getStatus(),
+      current);
+    lastDisplay = millis();
+  }
+
+  // === АВАРИЙНЫЙ РЕЖИМ: пока удерживается СТОП ===
+  if (ui_isStopHeld()) {
+    modes_reset();
+    delay(10);
+    return;
+  }
+
   app_state_update();
+
+  // Сброс после аварии
+  // if (ui_stopReleased()) {
+
+  // }
 
   // Сброс по кнопкам
   if (modes_isWaitingForUserAction()) {
-    if (ui_start1Pressed() || ui_start2Pressed() || ui_stopPressed()) {
+    if (ui_start1Pressed() || ui_start2Pressed()) {
       modes_resetCycleData();
     }
   }
@@ -50,38 +83,13 @@ void loop() {
     relays_setGroup(currGroup ? GROUP_A : GROUP_B);
   }
 
-  if (ui_stopPressed()) {
-    relays_deactivateAll();
-    modes_reset();
-  }
-
   if (modes_isWaitingForUserAction()) {
-    if (ui_start1Pressed() || ui_start2Pressed() || ui_stopPressed()) {
+    if (ui_start1Pressed() || ui_start2Pressed()) {
       modes_clearWaitingState();
     }
   }
 
   modes_run();
-
-  static unsigned long lastDisplay = 0;
-  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
-    float current = current_readDC();
-    
-    display_update(
-      app_state_getRelay1Time(),
-      app_state_getDelay1Time(),
-      app_state_getRelay2Time(),
-      app_state_getDelay2Time(),
-      app_state_getCurrentCycle(),
-      app_state_getCycleLimit(),
-      app_state_getInfiniteCycles(),
-      (int)app_state_getMode(),
-      app_state_getGroupA(),
-      modes_getCycleElapsedTime(),
-      modes_getStatus(),
-      current);
-    lastDisplay = millis();
-  }
 
   delay(10);
 }

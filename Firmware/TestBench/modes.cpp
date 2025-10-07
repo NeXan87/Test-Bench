@@ -75,7 +75,7 @@ bool modes_isWaitingForUserAction() {
 }
 
 void modes_clearWaitingState() {
-  if (ui_start1Pressed() || ui_start2Pressed() || ui_stopPressed()) {
+  if (ui_start1Pressed() || ui_start2Pressed()) {
     s_waitingForUserAction = false;
   }
 }
@@ -122,7 +122,7 @@ void modes_run() {
 
   // Сброс состояния "ожидания" при любом действии
   if (s_waitingForUserAction) {
-    if (ui_start1Pressed() || ui_start2Pressed() || ui_stopPressed()) {
+    if (ui_start1Pressed() || ui_start2Pressed()) {
       s_cycle = 0;
       app_state_setCurrentCycle(0);
       s_cycleStartTime = millis();
@@ -131,7 +131,7 @@ void modes_run() {
     }
   }
 
-    if (mode == MODE_MANUAL_BLOCKING || mode == MODE_MANUAL_INDEPENDENT) {
+  if (mode == MODE_MANUAL_BLOCKING || mode == MODE_MANUAL_INDEPENDENT) {
     g_isFinished = false;
     int r1 = isCurrentGroupA ? RELAY1_PIN : RELAY3_PIN;
     int r2 = isCurrentGroupA ? RELAY2_PIN : RELAY4_PIN;
@@ -154,26 +154,17 @@ void modes_run() {
       bool r1On = (digitalRead(r1) == HIGH);
       bool r2On = (digitalRead(r2) == HIGH);
 
-      // Сброс состояния при остановке
-      if (ui_stopPressed()) {
-        digitalWrite(r1, LOW);
-        digitalWrite(r2, LOW);
-        s_relay1Locked = false;
-        s_relay2Locked = false;
-        s_anyRelayActiveInGroupB = false;
-      } else {
-        // Включение реле 1
-        if (!s_relay1Locked && ui_start1Pressed() && !r1On && !r2On) {
-          digitalWrite(r1, HIGH);
-          s_relay1Locked = true;
-          s_anyRelayActiveInGroupB = true;
-        }
-        // Включение реле 2
-        if (!s_relay2Locked && ui_start2Pressed() && !r2On && !r1On) {
-          digitalWrite(r2, HIGH);
-          s_relay2Locked = true;
-          s_anyRelayActiveInGroupB = true;
-        }
+      // Включение реле 1
+      if (!s_relay1Locked && ui_start1Pressed() && !r1On && !r2On) {
+        digitalWrite(r1, HIGH);
+        s_relay1Locked = true;
+        s_anyRelayActiveInGroupB = true;
+      }
+      // Включение реле 2
+      if (!s_relay2Locked && ui_start2Pressed() && !r2On && !r1On) {
+        digitalWrite(r2, HIGH);
+        s_relay2Locked = true;
+        s_anyRelayActiveInGroupB = true;
       }
 
       // Индикация
@@ -248,7 +239,7 @@ void modes_run() {
           digitalWrite(LED4_PIN, false);
 
           // При нажатии ЛЮБОЙ кнопки — переход в IDLE
-          if (ui_start1Pressed() || ui_start2Pressed() || ui_stopPressed()) {
+          if (ui_start1Pressed() || ui_start2Pressed()) {
             modes_forceIdle();
           }
           return;
@@ -265,41 +256,33 @@ void modes_run() {
     g_isFinished = false;
     g_isWorking = s_a1.active || s_a2.active;
 
-    // Обработка кнопки СТОП — выключает всё
-    if (ui_stopPressed()) {
-      s_a1.active = false;
-      s_a2.active = false;
-      digitalWrite(r1, LOW);
-      digitalWrite(r2, LOW);
-    } else {
-      // === Кнопка Пуск 1: переключает состояние реле 1 ===
-      if (ui_start1Pressed()) {
-        if (s_a1.active) {
-          // Остановка реле 1
-          s_a1.active = false;
-          digitalWrite(r1, LOW);
-        } else {
-          // Запуск реле 1
-          s_a1.active = true;
-          s_a1.onPhase = true;
-          s_a1.phaseStart = millis();
-          digitalWrite(r1, HIGH);
-        }
+    // === Кнопка Пуск 1: переключает состояние реле 1 ===
+    if (ui_start1Pressed()) {
+      if (s_a1.active) {
+        // Остановка реле 1
+        s_a1.active = false;
+        digitalWrite(r1, LOW);
+      } else {
+        // Запуск реле 1
+        s_a1.active = true;
+        s_a1.onPhase = true;
+        s_a1.phaseStart = millis();
+        digitalWrite(r1, HIGH);
       }
+    }
 
-      // === Кнопка Пуск 2: переключает состояние реле 2 ===
-      if (ui_start2Pressed()) {
-        if (s_a2.active) {
-          // Остановка реле 2
-          s_a2.active = false;
-          digitalWrite(r2, LOW);
-        } else {
-          // Запуск реле 2
-          s_a2.active = true;
-          s_a2.onPhase = true;
-          s_a2.phaseStart = millis();
-          digitalWrite(r2, HIGH);
-        }
+    // === Кнопка Пуск 2: переключает состояние реле 2 ===
+    if (ui_start2Pressed()) {
+      if (s_a2.active) {
+        // Остановка реле 2
+        s_a2.active = false;
+        digitalWrite(r2, LOW);
+      } else {
+        // Запуск реле 2
+        s_a2.active = true;
+        s_a2.onPhase = true;
+        s_a2.phaseStart = millis();
+        digitalWrite(r2, HIGH);
       }
     }
 

@@ -15,7 +15,8 @@ void ui_clearLEDs();
 void ui_blinkAllLEDs();
 bool ui_start1Pressed();
 bool ui_start2Pressed();
-bool ui_stopPressed();
+bool ui_isStopHeld();
+bool ui_stopReleased();
 void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, int mode);
 
 #endif

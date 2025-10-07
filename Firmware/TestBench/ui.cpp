@@ -46,7 +46,18 @@ void ui_clearLEDs() {
 
 bool ui_start1Pressed() { return g_btn1.fell(); }
 bool ui_start2Pressed() { return g_btn2.fell(); }
-bool ui_stopPressed() { return g_btnStop.fell(); }
+
+bool ui_isStopHeld() {
+  return !g_btnStop.read();
+}
+
+// bool ui_stopReleased() {
+//   static bool wasHeld = false;
+//   bool isHeld = ui_isStopHeld();
+//   bool released = wasHeld && !isHeld;
+//   wasHeld = isHeld;
+//   return released;
+// }
 
 void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, int mode) {
   if (mode == 3) {
