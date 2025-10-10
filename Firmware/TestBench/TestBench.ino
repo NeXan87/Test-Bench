@@ -23,7 +23,7 @@ void loop() {
 
   static unsigned long lastDisplay = 0;
   if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
-    float current = current_readDC();
+    float current = 0;
 
     display_update(
       app_state_getRelay1Time(),
@@ -48,7 +48,11 @@ void loop() {
     return;
   }
 
-  app_state_update();
+  static unsigned long lastPotUpdate = 0;
+  if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {  // раз в 100 мс
+    app_state_update();
+    lastPotUpdate = millis();
+  }
 
   // Сброс после аварии
   // if (ui_stopReleased()) {
@@ -90,6 +94,4 @@ void loop() {
   }
 
   modes_run();
-
-  delay(10);
 }

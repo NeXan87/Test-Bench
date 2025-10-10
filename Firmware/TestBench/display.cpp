@@ -32,7 +32,7 @@ void display_update(
   unsigned long cycleTimeMs,
   const char* status,
   float current) {
-  lcd.clear();
+  char buffer[8];
 
   // Строка 1: T1, D1, режим
   lcd.setCursor(0, 0);
@@ -55,12 +55,19 @@ void display_update(
   // Строка 3: Циклы, ток
   lcd.setCursor(0, 2);
   lcd.print("Cycl: ");
-  lcd.print(currentCycle);
-  lcd.print("/");
-  lcd.print(infinite ? "INF" : String(totalCycles));
+  if (infinite) {
+    sprintf(buffer, "%03d/INF", currentCycle);
+  } else {
+    sprintf(buffer, "%03d/%03d", currentCycle, totalCycles);
+  }
+  lcd.print(buffer);
   lcd.setCursor(14, 2);
   lcd.print("I:");
-  lcd.print((int)current);
+  int whole = (int)current;
+  int decimal = (int)((current - whole) * 10 + 0.5);
+  lcd.print(whole);
+  lcd.print('.');
+  lcd.print(decimal);
   lcd.print("A");
 
   // Строка 4: Текущее время цикла, состояние работы
