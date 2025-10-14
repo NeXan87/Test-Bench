@@ -49,7 +49,7 @@ void loop() {
   }
 
   static unsigned long lastPotUpdate = 0;
-  if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {  // раз в 100 мс
+  if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
     app_state_update();
     lastPotUpdate = millis();
   }
