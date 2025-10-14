@@ -11,7 +11,7 @@ void display_update(
   int currentCycle,
   int totalCycles,
   bool infinite,
-  int mode,
+  uint8_t mode,
   bool groupA,
   unsigned long cycleTimeMs,
   const char* status,

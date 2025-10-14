@@ -17,6 +17,6 @@ bool ui_start1Pressed();
 bool ui_start2Pressed();
 bool ui_isStopHeld();
 bool ui_stopReleased();
-void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, int mode);
+void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, uint8_t mode);
 
 #endif

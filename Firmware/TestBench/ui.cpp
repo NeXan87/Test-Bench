@@ -86,7 +86,7 @@ void ui_clearLEDs() {
   }
 }
 
-void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, int mode) {
+void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, uint8_t mode) {
   if (mode == 3) {
     ui_setLED(0, r1Active && r1On);
     ui_setLED(1, r1Active && !r1On);
