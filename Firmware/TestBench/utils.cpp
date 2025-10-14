@@ -2,21 +2,28 @@
 #include "config.h"
 
 const char* utils_formatTimeSec(unsigned long ms) {
-  static char buffer[5]; // "00s\0"
-  int sec = ms / 1000;
-  sprintf(buffer, "%02ds", sec);
+  static char buffer[5]; // "00s"
+  uint16_t sec = ms / 1000; // для скорости — int заменен на uint16_t
+  buffer[0] = '0' + (sec / 10) % 10;
+  buffer[1] = '0' + sec % 10;
+  buffer[2] = 's';
+  buffer[3] = '\0';
   return buffer;
 }
 
 const char* utils_formatCycleTime(unsigned long elapsedMs) {
-  static char buffer[7]; // "MM:SS"
+  static char buffer[6]; // "MM:SS" + '\0'
+  uint16_t totalSec = (elapsedMs / 1000UL) % MAX_DISPLAY_TIME_SEC; // безопасный тип
+  uint8_t minutes = totalSec / 60;
+  uint8_t seconds = totalSec % 60;
+
+  // Быстрее, чем sprintf (экономия > 1 КБ флеша на AVR)
+  buffer[0] = '0' + (minutes / 10);
+  buffer[1] = '0' + (minutes % 10);
+  buffer[2] = ':';
+  buffer[3] = '0' + (seconds / 10);
+  buffer[4] = '0' + (seconds % 10);
+  buffer[5] = '\0';
   
-  // Максимум 99 минут 59 секунд = 5999 секунд
-  unsigned long totalSec = (elapsedMs / 1000) % MAX_DISPLAY_TIME_SEC; // 6000 = 100*60
-  
-  byte minutes = totalSec / 60;
-  byte seconds = totalSec % 60;
-  
-  sprintf(buffer, "%02d:%02d", minutes, seconds);
   return buffer;
 }
