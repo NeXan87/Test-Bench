@@ -3,14 +3,14 @@
 
 // =============== ПИНЫ ===============
 // Реле
-#define RELAY1_PIN 1
-#define RELAY2_PIN 0
+#define RELAY1_PIN 4
+#define RELAY2_PIN 5
 #define RELAY3_PIN 2
 #define RELAY4_PIN 3
 
 // Переключатели
-#define MODE0_PIN 4
-#define MODE1_PIN 5
+#define MODE0_PIN 1
+#define MODE1_PIN 0
 #define GROUP_PIN 6
 
 // Кнопки
