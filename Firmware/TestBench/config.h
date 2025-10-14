@@ -59,7 +59,7 @@
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
 #define DISPLAY_UPDATE_INTERVAL_MS 200  // Обновление дисплея
-#define POT_UPDATE_INTERVAL_MS 100      // Частота опроса потенциометров
+#define POT_UPDATE_INTERVAL_MS 150      // Частота опроса потенциометров
 #define BLINK_INTERVAL_MS 500           // Мигание при блокировке
 #define CURRENT_SAMPLES 100             // Усреднение тока
 #define STARTUP_TIMEOUT 1500            // Длительность отображения заставки при включении
