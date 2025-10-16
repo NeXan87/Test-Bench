@@ -49,10 +49,14 @@ void display_update(
   // ===========================================================
   if (!layoutDrawn) {
     lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(F("R1:  s D1:  s M:"));
-    lcd.setCursor(0, 1); lcd.print(F("R2:  s D2:  s G:"));
-    lcd.setCursor(0, 2); lcd.print(F("Cycl:         I: . A"));
-    lcd.setCursor(0, 3); lcd.print(F("Time:"));
+    lcd.setCursor(0, 0);
+    lcd.print(F("R1:  s D1:  s M:"));
+    lcd.setCursor(0, 1);
+    lcd.print(F("R2:  s D2:  s G:"));
+    lcd.setCursor(0, 2);
+    lcd.print(F("Cycl:         I: . A"));
+    lcd.setCursor(0, 3);
+    lcd.print(F("Time:"));
     layoutDrawn = true;
   }
 
@@ -101,10 +105,11 @@ void display_update(
   // ---- Cycle counter ----
   if (currentCycle != prev_currentCycle || totalCycles != prev_totalCycles || infinite != prev_infinite) {
     lcd.setCursor(6, 2);
-    if (infinite)
+    if (infinite) {
       snprintf(buffer, sizeof(buffer), "%03d/INF", currentCycle);
-    else
+    } else {
       snprintf(buffer, sizeof(buffer), "%03d/%03d", currentCycle, totalCycles);
+    }
     lcd.print(buffer);
     prev_currentCycle = currentCycle;
     prev_totalCycles = totalCycles;
