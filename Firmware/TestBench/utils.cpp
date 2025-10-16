@@ -2,7 +2,7 @@
 #include "config.h"
 
 const char* utils_formatTimeSec(unsigned long ms) {
-  static char buffer[4]; // "00"
+  static char buffer[3]; // "00"
   uint16_t sec = ms / 1000; // для скорости — int заменен на uint16_t
   buffer[0] = '0' + (sec / 10) % 10;
   buffer[1] = '0' + sec % 10;

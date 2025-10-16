@@ -10,5 +10,6 @@ void modes_clearWaitingState();
 void modes_resetCycleData();
 void modes_forceIdle();
 const char* modes_getStatus();
+bool modes_isWorking();
 
 #endif

@@ -109,6 +109,10 @@ bool modes_isWaitingForUserAction() {
   return s_waitingForUserAction;
 }
 
+bool modes_isWorking() {
+  return g_isWorking;
+}
+
 void modes_clearWaitingState() {
   if (ui_start1Pressed() || ui_start2Pressed()) s_waitingForUserAction = false;
 }
