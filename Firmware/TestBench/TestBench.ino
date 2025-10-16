@@ -49,7 +49,7 @@ void loop() {
   }
 
   static unsigned long lastPotUpdate = 0;
-  if (!modes_isWorking() && millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
+  if (!modes_isWorking() && !modes_isFinished() && millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
     app_state_update();
     lastPotUpdate = millis();
   }
