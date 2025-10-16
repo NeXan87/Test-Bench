@@ -100,7 +100,7 @@ void display_update(
 
   // ---- Cycle counter ----
   if (currentCycle != prev_currentCycle || totalCycles != prev_totalCycles || infinite != prev_infinite) {
-    lcd.setCursor(5, 2);
+    lcd.setCursor(6, 2);
     if (infinite)
       snprintf(buffer, sizeof(buffer), "%03d/INF", currentCycle);
     else
@@ -124,7 +124,7 @@ void display_update(
 
   // ---- Cycle Time ----
   if (cycleTimeMs != prev_cycleTime) {
-    lcd.setCursor(5, 3);
+    lcd.setCursor(6, 3);
     lcd.print(utils_formatCycleTime(cycleTimeMs));
     prev_cycleTime = cycleTimeMs;
   }
