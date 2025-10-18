@@ -86,8 +86,8 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
 // ----------------- API -----------------
 
 const char* modes_getStatus() {
-  if (g_isFinished) return "FINISH";
-  return g_isWorking ? "WORK  " : "STOP  ";
+  if (g_isFinished) return "  FINISH";
+  return g_isWorking ? "    WORK" : "    STOP";
 }
 
 void modes_forceIdle() {

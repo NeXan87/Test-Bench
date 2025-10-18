@@ -136,7 +136,7 @@ void display_update(
 
   // ---- Status ----
   if (strncmp(status, prev_status, sizeof(prev_status)) != 0) {
-    lcd.setCursor(14, 3);
+    lcd.setCursor(12, 3);
     lcd.print(status);
     strncpy(prev_status, status, sizeof(prev_status) - 1);
     prev_status[sizeof(prev_status) - 1] = '\0';
