@@ -72,6 +72,7 @@
 #define STEP3_SIZE       10
 #define STEP4_SIZE       50
 
+
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
 #define DISPLAY_UPDATE_INTERVAL_MS 200  // Обновление дисплея
 #define POT_UPDATE_INTERVAL_MS 150      // Частота опроса потенциометров
@@ -82,5 +83,10 @@
 // =============== ОГРАНИЧЕНИЯ ===============
 #define MAX_DISPLAY_TIME_SEC 6000  // 100 минут в секундах (99:59 + 1)
 #define ADC_ZERO_OFFSET 512.0f     // Середина ADC (0A для ACS712)
+
+// =============== ВРЕМЯ ЦИКЛА ===============
+#define MAX_DISPLAY_TIME_HH   99
+#define MAX_DISPLAY_TIME_MM   59
+#define MAX_DISPLAY_TIME_SS   59
 
 #endif

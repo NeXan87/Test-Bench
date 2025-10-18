@@ -56,7 +56,7 @@ void display_update(
     lcd.setCursor(0, 2);
     lcd.print(F("Cycl:         I: . A"));
     lcd.setCursor(0, 3);
-    lcd.print(F("Time:"));
+    lcd.print(F("T:"));
     layoutDrawn = true;
   }
 
@@ -129,7 +129,7 @@ void display_update(
 
   // ---- Cycle Time ----
   if (cycleTimeMs != prev_cycleTime) {
-    lcd.setCursor(6, 3);
+    lcd.setCursor(3, 3);
     lcd.print(utils_formatCycleTime(cycleTimeMs));
     prev_cycleTime = cycleTimeMs;
   }
