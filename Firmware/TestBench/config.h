@@ -57,6 +57,21 @@
 #define MAX_CYCLES 999
 #define INFINITY_THRESHOLD 1000  // analogRead() > 1000 → бесконечность
 
+// =============== КРИВАЯ ОТОБРАЖЕНИЯ ЦИКЛОВ ===============
+#define CYCLE_CURVE_POWER 1.5f  // >1 — "ускоренная" шкала (больше значений в правой части)
+
+// =============== Границы ступеней ===============
+#define STEP1_MAX        10   // до 10 → шаг 1
+#define STEP2_MAX        100  // 11–100 → шаг 5
+#define STEP3_MAX        500  // 101–500 → шаг 10
+#define STEP4_MAX        999  // 501–999 → шаг 50
+
+// =============== Шаги ===============
+#define STEP1_SIZE       1
+#define STEP2_SIZE       5
+#define STEP3_SIZE       10
+#define STEP4_SIZE       50
+
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
 #define DISPLAY_UPDATE_INTERVAL_MS 200  // Обновление дисплея
 #define POT_UPDATE_INTERVAL_MS 150      // Частота опроса потенциометров

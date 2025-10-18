@@ -60,17 +60,17 @@ bool app_state_readSwitches() {
 // --- Обновление состояний потенциометров с антидребезгом ---
 void app_state_update() {
   // 1️⃣ Считываем "сырые" значения АЦП
-  int adc_on1    = analogRead(POT_ON1_PIN);
-  int adc_d1     = analogRead(POT_DELAY1_PIN);
-  int adc_on2    = analogRead(POT_ON2_PIN);
-  int adc_d2     = analogRead(POT_DELAY2_PIN);
+  int adc_on1 = analogRead(POT_ON1_PIN);
+  int adc_d1 = analogRead(POT_DELAY1_PIN);
+  int adc_on2 = analogRead(POT_ON2_PIN);
+  int adc_d2 = analogRead(POT_DELAY2_PIN);
   int adc_cycles = analogRead(POT_CYCLES_PIN);
 
   // 2️⃣ Сглаживаем (EMA)
-  f_on1    = smooth(f_on1, adc_on1);
-  f_d1     = smooth(f_d1, adc_d1);
-  f_on2    = smooth(f_on2, adc_on2);
-  f_d2     = smooth(f_d2, adc_d2);
+  f_on1 = smooth(f_on1, adc_on1);
+  f_d1 = smooth(f_d1, adc_d1);
+  f_on2 = smooth(f_on2, adc_on2);
+  f_d2 = smooth(f_d2, adc_d2);
   f_cycles = smooth(f_cycles, adc_cycles);
 
   // 3️⃣ Пересчитываем в миллисекунды
@@ -102,10 +102,34 @@ void app_state_update() {
   int potCycles = constrain((int)f_cycles, 0, 1023);
   if (potCycles > INFINITY_THRESHOLD) {
     s_inf = true;
-    s_cycles = INFINITY_THRESHOLD;
+    s_cycles = MAX_CYCLES;
   } else {
     s_inf = false;
-    s_cycles = mapFast(potCycles, 0, 1000, MIN_CYCLES, MAX_CYCLES);
+
+    if (potCycles == 0) {
+      s_cycles = 1;  // только при самом левом положении
+    } else {
+      // Нелинейное преобразование: x^power
+      float normalized = potCycles / 1023.0f;             // 0–1
+      float curved = pow(normalized, CYCLE_CURVE_POWER);  // 0–1, но с искажением
+
+      // Преобразуем в диапазон 1–999
+      int rawCycles = (int)(curved * (MAX_CYCLES - MIN_CYCLES) + MIN_CYCLES);
+
+      // Применяем многоступенчатый шаг
+      if (rawCycles <= STEP1_MAX) {
+        s_cycles = ((rawCycles - MIN_CYCLES) / STEP1_SIZE) * STEP1_SIZE + MIN_CYCLES;
+      } else if (rawCycles <= STEP2_MAX) {
+        s_cycles = ((rawCycles - STEP1_MAX - 1) / STEP2_SIZE) * STEP2_SIZE + STEP1_MAX;
+      } else if (rawCycles <= STEP3_MAX) {
+        s_cycles = ((rawCycles - STEP2_MAX - 1) / STEP3_SIZE) * STEP3_SIZE + STEP2_MAX ;
+      } else {
+        s_cycles = ((rawCycles - STEP3_MAX - 1) / STEP4_SIZE) * STEP4_SIZE + STEP3_MAX;
+      }
+
+      // Убедимся, что не превышает максимум
+      if (s_cycles > MAX_CYCLES) s_cycles = MAX_CYCLES;
+    }
   }
 }
 
