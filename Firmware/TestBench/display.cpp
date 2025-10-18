@@ -48,15 +48,25 @@ void display_update(
   // 1️⃣ Разметка экрана (печатается один раз при первом вызове)
   // ===========================================================
   if (!layoutDrawn) {
+    static const uint8_t ARROW_POSITIONS[] = { 2, 10, 17, 2, 10, 17, 1, 15, 1 };  // позиции
+    static const uint8_t ARROW_ROWS[] = { 0, 0, 0, 1, 1, 1, 2, 2, 3 };            // строки
+    static const uint8_t ARROW_COUNT = sizeof(ARROW_POSITIONS);
+
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print(F("R1:  s  D1:  s  M:"));
+    lcd.print(F("R1   s  D1   s  M"));
     lcd.setCursor(0, 1);
-    lcd.print(F("R2:  s  D2:  s  G:"));
+    lcd.print(F("R2   s  D2   s  G"));
     lcd.setCursor(0, 2);
-    lcd.print(F("Cycl:         I: . A"));
+    lcd.print(F("C             I  . A"));
     lcd.setCursor(0, 3);
-    lcd.print(F("T:"));
+    lcd.print(F("T"));
+
+    for (uint8_t i = 0; i < ARROW_COUNT; i++) {
+      lcd.setCursor(ARROW_POSITIONS[i], ARROW_ROWS[i]);
+      lcd.print(char(126));  // символ '→'
+    }
+
     layoutDrawn = true;
   }
 
@@ -104,12 +114,11 @@ void display_update(
 
   // ---- Cycle counter ----
   if (currentCycle != prev_currentCycle || totalCycles != prev_totalCycles || infinite != prev_infinite) {
-    lcd.setCursor(6, 2);
-    if (infinite) {
-      snprintf(buffer, sizeof(buffer), "%03d/INF", currentCycle);
-    } else {
-      snprintf(buffer, sizeof(buffer), "%03d/%03d", currentCycle, totalCycles);
-    }
+    lcd.setCursor(2, 2);
+    if (infinite)
+      snprintf(buffer, sizeof(buffer), "%04d/INF ", currentCycle);
+    else
+      snprintf(buffer, sizeof(buffer), "%04d/%04d", currentCycle, totalCycles);
     lcd.print(buffer);
     prev_currentCycle = currentCycle;
     prev_totalCycles = totalCycles;
@@ -129,7 +138,7 @@ void display_update(
 
   // ---- Cycle Time ----
   if (cycleTimeMs != prev_cycleTime) {
-    lcd.setCursor(3, 3);
+    lcd.setCursor(2, 3);
     lcd.print(utils_formatCycleTime(cycleTimeMs));
     prev_cycleTime = cycleTimeMs;
   }
