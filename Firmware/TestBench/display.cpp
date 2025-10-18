@@ -50,9 +50,9 @@ void display_update(
   if (!layoutDrawn) {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print(F("R1:  s D1:  s M:"));
+    lcd.print(F("R1:  s  D1:  s  M:"));
     lcd.setCursor(0, 1);
-    lcd.print(F("R2:  s D2:  s G:"));
+    lcd.print(F("R2:  s  D2:  s  G:"));
     lcd.setCursor(0, 2);
     lcd.print(F("Cycl:         I: . A"));
     lcd.setCursor(0, 3);
@@ -72,13 +72,13 @@ void display_update(
   }
 
   if (d1 != prev_d1) {
-    lcd.setCursor(10, 0);
+    lcd.setCursor(11, 0);
     lcd.print(utils_formatTimeSec(d1));
     prev_d1 = d1;
   }
 
   if (mode != prev_mode) {
-    lcd.setCursor(16, 0);
+    lcd.setCursor(18, 0);
     lcd.print(mode);
     prev_mode = mode;
   }
@@ -91,13 +91,13 @@ void display_update(
   }
 
   if (d2 != prev_d2) {
-    lcd.setCursor(10, 1);
+    lcd.setCursor(11, 1);
     lcd.print(utils_formatTimeSec(d2));
     prev_d2 = d2;
   }
 
   if (groupA != prev_groupA) {
-    lcd.setCursor(16, 1);
+    lcd.setCursor(18, 1);
     lcd.print(groupA ? F("A") : F("B"));
     prev_groupA = groupA;
   }
