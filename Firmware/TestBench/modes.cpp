@@ -60,6 +60,7 @@ inline void stopAllInternal() {
   s_a1.active = s_a2.active = false;
   app_state_setCurrentCycle(0);
   s_cycleRunning = false;
+  g_isFinished = false;
   s_cycleStartTime = 0;
 }
 
@@ -87,7 +88,8 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
 
 const char* modes_getStatus() {
   if (g_isFinished) return "  FINISH";
-  return g_isWorking ? "    WORK" : "    STOP";
+  if (ui_isStopHeld()) return "    STOP";
+  return g_isWorking ? "    WORK" : "   READY";
 }
 
 void modes_forceIdle() {
