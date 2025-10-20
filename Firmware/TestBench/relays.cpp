@@ -40,9 +40,3 @@ void relays_deactivateAll() {
   for (uint8_t i = 0; i < RELAY_COUNT; ++i)
     digitalWrite(RELAY_PINS[i], LOW);
 }
-
-bool relays_isIdle() {
-  for (uint8_t i = 0; i < RELAY_COUNT; ++i)
-    if (digitalRead(RELAY_PINS[i]) == HIGH) return false;
-  return true;
-}

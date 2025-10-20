@@ -11,6 +11,5 @@ void relays_setGroup(RelayGroup group);
 void relays_activateFirst(bool blockOther = true);
 void relays_activateSecond(bool blockOther = true);
 void relays_deactivateAll();
-bool relays_isIdle();
 
 #endif

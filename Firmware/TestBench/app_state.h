@@ -21,7 +21,6 @@ unsigned long app_state_getRelay2Time();
 unsigned long app_state_getDelay2Time();
 int app_state_getCycleLimit();
 bool app_state_getInfiniteCycles();
-bool app_state_isIdle();
 void app_state_setCurrentCycle(int cycle);
 int app_state_getCurrentCycle();
 

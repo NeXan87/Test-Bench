@@ -70,7 +70,7 @@ void loop() {
   static Mode lastMode = MODE_MANUAL_BLOCKING;
   static bool lastGroup = true;
 
-  if (app_state_isIdle()) {
+  if (!modes_isWorking()) {
     Mode currMode = app_state_getMode();
     bool currGroup = app_state_getGroupA();
 

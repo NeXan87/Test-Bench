@@ -165,6 +165,3 @@ int app_state_getCycleLimit() {
 bool app_state_getInfiniteCycles() {
   return s_inf;
 }
-bool app_state_isIdle() {
-  return relays_isIdle();
-}
