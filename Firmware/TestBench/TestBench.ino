@@ -19,9 +19,10 @@ void setup() {
 }
 
 void loop() {
-  ui_updateButtons();
-
+  static unsigned long lastPotUpdate = 0;
   static unsigned long lastDisplay = 0;
+
+
   if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
     float current = 0;
 
@@ -41,6 +42,8 @@ void loop() {
     lastDisplay = millis();
   }
 
+  ui_updateButtons();
+
   // === АВАРИЙНЫЙ РЕЖИМ: пока удерживается СТОП ===
   if (ui_isStopHeld()) {
     modes_reset();
@@ -48,48 +51,25 @@ void loop() {
     return;
   }
 
-  static unsigned long lastPotUpdate = 0;
-  if (!modes_isWorking() && !modes_isFinished() && millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
-    app_state_update();
-    lastPotUpdate = millis();
-  }
-
-  // Сброс после аварии
-  // if (ui_stopReleased()) {
-
-  // }
-
-  // Сброс по кнопкам
-  if (modes_isWaitingForUserAction()) {
-    if (ui_start1Pressed() || ui_start2Pressed()) {
-      modes_resetCycleData();
-    }
-  }
-
-  // Сброс по переключателям
-  static Mode lastMode = MODE_MANUAL_BLOCKING;
-  static bool lastGroup = true;
-
-  if (!modes_isWorking()) {
+  if (!modes_isWorking() && !modes_isFinished()) {
+    static Mode lastMode = app_state_getMode();
+    static bool lastGroup = app_state_getGroupA();
     Mode currMode = app_state_getMode();
     bool currGroup = app_state_getGroupA();
 
     if (currMode != lastMode || currGroup != lastGroup) {
-      if (modes_isWaitingForUserAction()) {
-        modes_resetCycleData();
-      }
-      modes_forceIdle();
+      modes_reset();
+
       lastMode = currMode;
       lastGroup = currGroup;
     }
 
     app_state_readSwitches();
     relays_setGroup(currGroup ? GROUP_A : GROUP_B);
-  }
 
-  if (modes_isWaitingForUserAction()) {
-    if (ui_start1Pressed() || ui_start2Pressed()) {
-      modes_clearWaitingState();
+    if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
+      app_state_update();
+      lastPotUpdate = millis();
     }
   }
 

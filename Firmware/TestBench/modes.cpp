@@ -25,11 +25,12 @@ bool s_anyRelayActiveInGroupB = false;
 
 unsigned long s_cycleStartTime = 0;
 bool s_cycleRunning = false;
-bool s_waitingForUserAction = false;
 unsigned long s_finalElapsedTime = 0;
 bool g_isWorking = false;
 bool g_isFinished = false;
 bool g_isLocked = false;
+bool g_isPaused = false;
+unsigned long s_pauseStart = 0;  // время начала паузы
 
 struct AsyncRelay {
   bool active = false;
@@ -62,7 +63,9 @@ inline void stopAllInternal() {
   app_state_setCurrentCycle(0);
   s_cycleRunning = false;
   g_isFinished = false;
+  g_isPaused = false;
   s_cycleStartTime = 0;
+  s_pauseStart = 0;
 }
 
 // Обработка одного асинхронного реле (минимизация дублирования)
@@ -91,38 +94,20 @@ const char* modes_getStatus() {
   if (g_isFinished) return "  FINISH";
   if (ui_isStopHeld()) return "    STOP";
   if (g_isLocked) return "  LOCKED";
+  if (g_isPaused) return "  PAUSED";
   return g_isWorking ? "    WORK" : "   READY";
-}
-
-void modes_forceIdle() {
-  s_syncActive = false;
-  s_sync = IDLE;
-  s_waitingForUserAction = false;
-  s_finalElapsedTime = 0;
-}
-
-void modes_resetCycleData() {
-  s_cycle = 0;
-  app_state_setCurrentCycle(0);
-  s_cycleStartTime = millis();
-  s_cycleRunning = false;
-  s_waitingForUserAction = false;
-}
-
-bool modes_isWaitingForUserAction() {
-  return s_waitingForUserAction;
 }
 
 bool modes_isWorking() {
   return g_isWorking;
 }
 
-bool modes_isFinished() {
-  return g_isFinished;
+bool modes_isPaused() {
+  return g_isPaused;
 }
 
-void modes_clearWaitingState() {
-  if (ui_start1Pressed() || ui_start2Pressed()) s_waitingForUserAction = false;
+bool modes_isFinished() {
+  return g_isFinished;
 }
 
 void modes_init() {
@@ -161,15 +146,6 @@ void modes_run() {
   if (!isBlocked && g_isLocked) {
     g_isLocked = false;
     ui_clearLEDs();
-  }
-
-  // Сброс ожидания при нажатии кнопок
-  if (s_waitingForUserAction && (ui_start1Pressed() || ui_start2Pressed())) {
-    s_cycle = 0;
-    app_state_setCurrentCycle(0);
-    s_cycleStartTime = millis();
-    s_cycleRunning = false;
-    s_waitingForUserAction = false;
   }
 
   // Режимы manual: определяем, работает ли система (есть ли реле включённые)
@@ -234,39 +210,66 @@ void modes_run() {
       return;
     }
 
+    if (ui_start1Pressed() || ui_start2Pressed()) {
+      if (s_syncActive && !g_isPaused) {
+        // Включаем паузу
+        g_isPaused = true;
+        s_pauseStart = millis();
+        relays_deactivateAll();
+        ui_clearLEDs();
+        return;
+      } else if (g_isPaused) {
+        // Выключаем паузу
+        g_isPaused = false;
+        // Восстанавливаем состояние
+        if (s_sync == R1_ON) {
+          digitalWrite(r1_pin, HIGH);
+        } else if (s_sync == R2_ON) {
+          digitalWrite(r2_pin, HIGH);
+        }
+        s_cycleStartTime += (millis() - s_pauseStart);
+        return;
+      }
+    }
+
     // если активна, обрабатываем состояние синхрона
     switch (s_sync) {
       case R1_ON:
-        if (now - s_syncStart >= app_state_getRelay1Time()) {
+        if (g_isPaused) return;
+        if ((now - s_syncStart) >= app_state_getRelay1Time()) {
           digitalWrite(r1_pin, LOW);
           setSyncState(D1);
         }
         break;
 
       case D1:
-        if (now - s_syncStart >= app_state_getDelay1Time()) {
+        if (g_isPaused) return;
+        if ((now - s_syncStart) >= app_state_getDelay1Time()) {
           digitalWrite(r2_pin, HIGH);
           setSyncState(R2_ON);
         }
         break;
 
       case R2_ON:
-        if (now - s_syncStart >= app_state_getRelay2Time()) {
+        if (g_isPaused) return;
+        if ((now - s_syncStart) >= app_state_getRelay2Time()) {
           digitalWrite(r2_pin, LOW);
           setSyncState(D2);
         }
         break;
 
       case D2:
-        if (now - s_syncStart >= app_state_getDelay2Time()) {
-          s_cycle++;
-          app_state_setCurrentCycle(s_cycle);
+        if (g_isPaused) return;
+        if ((now - s_syncStart) >= app_state_getDelay2Time()) {
+          if (s_cycle <= MAX_CYCLE_COUNT) {
+            s_cycle++;
+            app_state_setCurrentCycle(s_cycle);
+          }
 
           if (!app_state_getInfiniteCycles() && s_cycle >= app_state_getCycleLimit()) {
             setSyncState(FINISHED);
             s_cycleRunning = false;
             s_finalElapsedTime = now - s_cycleStartTime;
-            s_waitingForUserAction = true;
             // почистим светодиоды ниже (FINISHED)
             break;
           } else {
@@ -278,14 +281,11 @@ void modes_run() {
 
       case FINISHED:
         s_cycleRunning = false;
-        s_waitingForUserAction = true;
         // гасим все LED
         digitalWrite(LED1_PIN, LOW);
         digitalWrite(LED2_PIN, LOW);
         digitalWrite(LED3_PIN, LOW);
         digitalWrite(LED4_PIN, LOW);
-
-        if (ui_start1Pressed() || ui_start2Pressed()) modes_forceIdle();
         return;
 
       default:
@@ -363,5 +363,14 @@ void modes_run() {
 }
 
 unsigned long modes_getCycleElapsedTime() {
-  return s_cycleRunning ? (millis() - s_cycleStartTime) : s_finalElapsedTime;
+  if (s_cycleRunning) {
+    if (g_isPaused) {
+      // Возвращаем время до паузы
+      return s_pauseStart - s_cycleStartTime;
+    } else {
+      // Возвращаем реальное время минус время пауз
+      return millis() - s_cycleStartTime;
+    }
+  }
+  return s_finalElapsedTime;
 }

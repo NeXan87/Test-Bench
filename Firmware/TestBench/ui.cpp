@@ -64,14 +64,6 @@ bool ui_isStopHeld() {
   return !g_btnStop.read();
 }
 
-// bool ui_stopReleased() {
-//   static bool wasHeld = false;
-//   bool isHeld = ui_isStopHeld();
-//   bool released = wasHeld && !isHeld;
-//   wasHeld = isHeld;
-//   return released;
-// }
-
 // ==========================
 // СВЕТОДИОДЫ
 // ==========================
