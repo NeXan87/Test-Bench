@@ -29,6 +29,7 @@ bool s_waitingForUserAction = false;
 unsigned long s_finalElapsedTime = 0;
 bool g_isWorking = false;
 bool g_isFinished = false;
+bool g_isLocked = false;
 
 struct AsyncRelay {
   bool active = false;
@@ -89,6 +90,7 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
 const char* modes_getStatus() {
   if (g_isFinished) return "  FINISH";
   if (ui_isStopHeld()) return "    STOP";
+  if (g_isLocked) return "  LOCKED";
   return g_isWorking ? "    WORK" : "   READY";
 }
 
@@ -143,16 +145,22 @@ void modes_run() {
   g_isWorking = false;
   g_isFinished = false;
 
-  // Блокировка (режимы запрещены для группы B)
+  // Блокировка (режимы 1 и 2 запрещены для группы B)
   const bool isBlocked = (!isGroupA) && (mode == MODE_ASYNC_AUTO || mode == MODE_MANUAL_INDEPENDENT);
-  static bool prevBlocked = false;
-  if (prevBlocked && !isBlocked) ui_clearLEDs();  // при выходе из блокировки
-  prevBlocked = isBlocked;
+
+  // Обновляем флаг блокировки
+  g_isLocked = isBlocked;
 
   if (isBlocked) {
     ui_blinkAllLEDs();
     relays_deactivateAll();
     return;
+  }
+
+  // Если не заблокировано — сбрасываем флаг
+  if (!isBlocked && g_isLocked) {
+    g_isLocked = false;
+    ui_clearLEDs();
   }
 
   // Сброс ожидания при нажатии кнопок
