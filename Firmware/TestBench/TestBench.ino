@@ -24,7 +24,7 @@ void loop() {
 
 
   if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
-    float current = 0;
+    float current = current_readDC();
 
     display_update(
       app_state_getRelay1Time(),

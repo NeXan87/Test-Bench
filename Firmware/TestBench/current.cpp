@@ -1,26 +1,12 @@
 #include "current.h"
 #include "config.h"
-#include <Arduino.h>
+#include <ACS712.h>  // Библиотека RobTillaart
+
+ACS712 sensor(CURRENT_SENSOR_PIN, 5.0, 1024, M_VPER_AMPERE);
 
 float current_readDC() {
-  static long sum = 0;
-  static int count = 0;
-  const int SAMPLES = 100;
-  
-  sum += analogRead(CURRENT_SENSOR_PIN);
-  count++;
-  
-  if (count >= SAMPLES) {
-    float avg = sum / (float)SAMPLES;
-    sum = 0;
-    count = 0;
-    
-    float voltage = (avg - ADC_ZERO_OFFSET) * (5.0f / 1023.0f);
-    float current = voltage * CURRENT_SCALE;
-    return current < 0 ? -current : current;
-  }
-  
-  // Возвращаем последнее известное значение
-  static float lastCurrent = 0.0f;
-  return lastCurrent;
+  float current = sensor.mA_DC() / 1000.0f;  // в амперах
+  current = (int)(current * 10.0f + 0.5f) / 10.0f;
+  if (current > MAX_CURRENT) current = MAX_CURRENT + 0.5f;      // ограничиваем 30А
+  return current;
 }

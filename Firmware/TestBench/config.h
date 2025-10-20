@@ -47,10 +47,11 @@
 #define MAX_DELAY_TIME 60000    // 60 сек
 
 // =============== КАЛИБРОВКА ТОКА ===============
-// ACS712-5A: 185 mV/A → 1023 / (5000/185) ≈ 37.85
-// ACS712-20A: 100 mV/A → ≈ 20.46
-// ACS712-30A: 66 mV/A → ≈ 13.53
-#define CURRENT_SCALE 13.53f
+// ACS712-5A: 185 mV/A
+// ACS712-20A: 100 mV/A
+// ACS712-30A: 66 mV/A
+#define M_VPER_AMPERE 66.0
+#define MAX_CURRENT 5.1
 
 // =============== ЦИКЛЫ ===============
 #define MIN_CYCLES 1
@@ -72,7 +73,6 @@
 #define STEP2_SIZE       5
 #define STEP3_SIZE       10
 #define STEP4_SIZE       50
-
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
 #define DISPLAY_UPDATE_INTERVAL_MS 200  // Обновление дисплея
