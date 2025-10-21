@@ -51,8 +51,10 @@
 // ACS712-20A: 100 mV/A
 // ACS712-30A: 66 mV/A
 #define M_VPER_AMPERE 66.0f
-#define MAX_CURRENT 5.1f
-#define MAX_CURRENT_DISPLAY 9.9f
+
+// =============== ЗАЩИТА ПО ТОКУ ===============
+#define OVERLOAD_CURRENT_LIMIT 5.1f   // Порог срабатывания (А)
+#define OVERLOAD_TIME         3000   // Время удержания (мс)
 
 // =============== ЦИКЛЫ ===============
 #define MIN_CYCLES 1

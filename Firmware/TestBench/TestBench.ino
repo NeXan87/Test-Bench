@@ -25,6 +25,7 @@ void loop() {
 
   if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
     float current = current_readDC();
+    current_updateOverloadProtection(current);
 
     display_update(
       app_state_getRelay1Time(),
@@ -51,7 +52,7 @@ void loop() {
     return;
   }
 
-  if (!modes_isWorking() && !modes_isFinished()) {
+  if (modes_isReady()) {
     static Mode lastMode = app_state_getMode();
     static bool lastGroup = app_state_getGroupA();
     Mode currMode = app_state_getMode();

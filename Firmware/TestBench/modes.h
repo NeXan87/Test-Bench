@@ -9,5 +9,6 @@ const char* modes_getStatus();
 bool modes_isWorking();
 bool modes_isPaused();
 bool modes_isFinished();
+bool modes_isReady();
 
 #endif

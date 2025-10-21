@@ -3,6 +3,7 @@
 #include "relays.h"
 #include "ui.h"
 #include "config.h"
+#include "current.h"
 
 namespace {
 enum SyncState { IDLE,
@@ -61,6 +62,7 @@ inline void stopAllInternal() {
   s_finalElapsedTime = 0;
   s_a1.active = s_a2.active = false;
   app_state_setCurrentCycle(0);
+  current_resetOverload();
   s_cycleRunning = false;
   g_isFinished = false;
   g_isPaused = false;
@@ -91,11 +93,17 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
 // ----------------- API -----------------
 
 const char* modes_getStatus() {
+  if (current_isOverload()) return "OVERLOAD";
   if (g_isFinished) return "  FINISH";
   if (ui_isStopHeld()) return "    STOP";
   if (g_isLocked) return "  LOCKED";
   if (g_isPaused) return "  PAUSED";
-  return g_isWorking ? "    WORK" : "   READY";
+  if (g_isWorking) return "    WORK";
+  return "   READY";
+}
+
+bool modes_isReady() {
+  return !(g_isWorking || g_isPaused || g_isFinished || current_isOverload() || ui_isStopHeld());
 }
 
 bool modes_isWorking() {
@@ -196,8 +204,13 @@ void modes_run() {
 
     unsigned long now = millis();
 
-    if (!s_syncActive) {
-      if (ui_start1Pressed() || ui_start2Pressed()) {
+    if (current_isOverload()) {
+      if (s_finalElapsedTime == 0) s_finalElapsedTime = now - s_cycleStartTime;
+      return;
+    }
+
+    if (ui_start1Pressed() || ui_start2Pressed()) {
+      if (!s_syncActive) {
         s_syncActive = true;
         s_cycle = 0;
         s_finalElapsedTime = 0;
@@ -206,15 +219,13 @@ void modes_run() {
         s_cycleStartTime = now;
         relays_activateFirst(true);
         setSyncState(R1_ON);
+        return;
       }
-      return;
-    }
 
-    if (ui_start1Pressed() || ui_start2Pressed()) {
       if (s_syncActive && !g_isPaused) {
         // Включаем паузу
         g_isPaused = true;
-        s_pauseStart = millis();
+        s_pauseStart = now;
         relays_deactivateAll();
         ui_clearLEDs();
         return;
@@ -227,7 +238,7 @@ void modes_run() {
         } else if (s_sync == R2_ON) {
           digitalWrite(r2_pin, HIGH);
         }
-        s_cycleStartTime += (millis() - s_pauseStart);
+        s_cycleStartTime += (now - s_pauseStart);
         return;
       }
     }
@@ -363,7 +374,7 @@ void modes_run() {
 }
 
 unsigned long modes_getCycleElapsedTime() {
-  if (s_cycleRunning) {
+  if (s_cycleRunning && !current_isOverload()) {
     if (g_isPaused) {
       // Возвращаем время до паузы
       return s_pauseStart - s_cycleStartTime;
