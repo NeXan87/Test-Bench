@@ -48,7 +48,7 @@ void display_update(
   // 1️⃣ Разметка экрана (печатается один раз при первом вызове)
   // ===========================================================
   if (!layoutDrawn) {
-    static const uint8_t ARROW_POSITIONS[] = { 2, 10, 17, 2, 10, 17, 1, 15, 1 };  // позиции
+    static const uint8_t ARROW_POSITIONS[] = { 2, 10, 17, 2, 10, 17, 1, 14, 1 };  // позиции
     static const uint8_t ARROW_ROWS[] = { 0, 0, 0, 1, 1, 1, 2, 2, 3 };            // строки
     static const uint8_t ARROW_COUNT = sizeof(ARROW_POSITIONS);
 
@@ -58,7 +58,7 @@ void display_update(
     lcd.setCursor(0, 1);
     lcd.print(F("R2   s  D2   s  G"));
     lcd.setCursor(0, 2);
-    lcd.print(F("C             I  . A"));
+    lcd.print(F("C            I     A"));
     lcd.setCursor(0, 3);
     lcd.print(F("T"));
 
@@ -126,13 +126,13 @@ void display_update(
   }
 
   // ---- Current ----
-  if (fabs(current - prev_current) > 0.05f) {
-    lcd.setCursor(16, 2);
-    uint8_t whole = (uint8_t)current;
-    uint8_t decimal = (uint8_t)((current - whole) * 10 + 0.5f);
-    lcd.print(whole);
-    lcd.setCursor(18, 2);
-    lcd.print(decimal);
+  if (fabs(current - prev_current) > 0.1f) {
+    lcd.setCursor(15, 2);
+    if (current >= 10.0f) {
+      lcd.print(current, 1);
+    } else {
+      lcd.print(current);
+    }
     prev_current = current;
   }
 

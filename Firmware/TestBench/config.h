@@ -50,8 +50,9 @@
 // ACS712-5A: 185 mV/A
 // ACS712-20A: 100 mV/A
 // ACS712-30A: 66 mV/A
-#define M_VPER_AMPERE 66.0
-#define MAX_CURRENT 5.1
+#define M_VPER_AMPERE 66.0f
+#define MAX_CURRENT 5.1f
+#define MAX_CURRENT_DISPLAY 9.9f
 
 // =============== ЦИКЛЫ ===============
 #define MIN_CYCLES 1
