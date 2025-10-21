@@ -33,11 +33,16 @@ bool g_isLocked = false;
 bool g_isPaused = false;
 unsigned long s_pauseStart = 0;  // время начала паузы
 
+bool s_brakeActive = false;
+bool s_brakeBlink = false;
+unsigned long s_brakeBlinkTime = 0;
+
 struct AsyncRelay {
   bool active = false;
   bool onPhase = false;
   unsigned long phaseStart = 0;
 };
+
 AsyncRelay s_a1, s_a2;
 
 // ---- хелперы ----
@@ -53,9 +58,16 @@ inline uint8_t currentRelay2Pin(bool groupA) {
   return groupA ? RELAY2_PIN : RELAY4_PIN;
 }
 
+void resetBrakeActive() {
+  s_brakeActive = false;
+  s_brakeBlink = false;
+  s_brakeBlinkTime = 0;
+}
+
 inline void stopAllInternal() {
   relays_deactivateAll();
   ui_clearLEDs();
+  resetBrakeActive();
   s_syncActive = false;
   s_sync = IDLE;
   s_cycle = 0;
@@ -139,7 +151,7 @@ void modes_run() {
   g_isFinished = false;
 
   // Блокировка (режимы 1 и 2 запрещены для группы B)
-  const bool isBlocked = (!isGroupA) && (mode == MODE_ASYNC_AUTO || mode == MODE_MANUAL_INDEPENDENT);
+  const bool isBlocked = !isGroupA && mode == MODE_ASYNC_AUTO;
 
   // Обновляем флаг блокировки
   g_isLocked = isBlocked;
@@ -357,18 +369,80 @@ void modes_run() {
 
   // ---------------- MANUAL INDEPENDENT ----------------
   if (mode == MODE_MANUAL_INDEPENDENT) {
-    if (ui_start1Pressed()) {
-      bool state = digitalRead(r1_pin);
-      digitalWrite(r1_pin, !state);
+    if (isGroupA) {
+      if (ui_start1Pressed()) {
+        bool state = digitalRead(r1_pin);
+        digitalWrite(r1_pin, !state);
+      }
+      if (ui_start2Pressed()) {
+        bool state = digitalRead(r2_pin);
+        digitalWrite(r2_pin, !state);
+      }
+      digitalWrite(LED1_PIN, digitalRead(r1_pin));
+      digitalWrite(LED2_PIN, LOW);
+      digitalWrite(LED3_PIN, digitalRead(r2_pin));
+      digitalWrite(LED4_PIN, LOW);
+      return;
+    } else {
+      bool r1On = (digitalRead(r1_pin) == HIGH);
+      bool r2On = (digitalRead(r2_pin) == HIGH);
+
+      // Управление тормозом
+      if (!s_brakeActive) {
+        if (ui_start1Pressed() || ui_start2Pressed()) {
+          s_brakeActive = true;
+          s_brakeBlink = true;
+          s_brakeBlinkTime = millis();
+          digitalWrite(RELAY1_PIN, HIGH);  // Растормозить
+        }
+      } else {
+        float current = current_readDC();
+
+        if (current > 0.3f) {
+          if (!s_relay1Locked && ui_start1Pressed() && !r1On && !r2On) {
+            s_relay1Locked = true;
+            s_brakeBlink = false;
+            digitalWrite(currentRelay1Pin(false), HIGH);  // Включить двигатель
+          }
+          if (!s_relay2Locked && ui_start2Pressed() && !r2On && !r1On) {
+            s_relay2Locked = true;
+            s_brakeBlink = false;
+            digitalWrite(currentRelay2Pin(false), HIGH);  // Включить двигатель
+          }
+        }
+      }
     }
-    if (ui_start2Pressed()) {
-      bool state = digitalRead(r2_pin);
-      digitalWrite(r2_pin, !state);
+
+    // Обновление светодиодов
+    if (s_brakeBlink) {
+      if (millis() - s_brakeBlinkTime >= 500) {
+        digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
+        s_brakeBlinkTime = millis();
+      }
+    } else {
+      digitalWrite(LED1_PIN, LOW);
+      
+      if (s_relay1Locked) {
+        digitalWrite(LED1_PIN, digitalRead(r1_pin));
+      } else if (s_relay2Locked) {
+        digitalWrite(LED3_PIN, digitalRead(r2_pin));
+      }
     }
-    digitalWrite(LED1_PIN, digitalRead(r1_pin));
-    digitalWrite(LED2_PIN, LOW);
-    digitalWrite(LED3_PIN, digitalRead(r2_pin));
-    digitalWrite(LED4_PIN, LOW);
+
+    // Контроль тока
+    if (s_relay1Locked || s_relay2Locked) {
+      float current = current_readDC();
+
+      if (current < 0.3f) {
+        relays_deactivateAll();
+        ui_clearLEDs();
+        resetBrakeActive();
+        // Установка статуса ошибки
+        // g_isError = true;
+        // g_errorCode = 1;  // Ошибка 1: ток ниже порога
+      }
+    }
+
     return;
   }
 }
