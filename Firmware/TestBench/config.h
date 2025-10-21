@@ -83,6 +83,8 @@
 #define BLINK_INTERVAL_MS 500           // Мигание при блокировке
 #define CURRENT_SAMPLES 100             // Усреднение тока
 #define STARTUP_TIMEOUT 1500            // Длительность отображения заставки при включении
+#define BRACKE_SLOW_INTERVAL_MS 1000            // Частота мигания светодиода в ожидании появления тока
+#define BRACKE_FAST_INTERVAL_MS 500            // Частота мигания светодиода в ожидании включения двигателя
 
 // =============== ОГРАНИЧЕНИЯ ===============
 #define MAX_DISPLAY_TIME_SEC 6000  // 100 минут в секундах (99:59 + 1)
