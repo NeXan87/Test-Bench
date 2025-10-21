@@ -93,9 +93,9 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
 // ----------------- API -----------------
 
 const char* modes_getStatus() {
+  if (ui_isStopHeld()) return "    STOP";
   if (current_isOverload()) return "OVERLOAD";
   if (g_isFinished) return "  FINISH";
-  if (ui_isStopHeld()) return "    STOP";
   if (g_isLocked) return "  LOCKED";
   if (g_isPaused) return "  PAUSED";
   if (g_isWorking) return "    WORK";
