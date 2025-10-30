@@ -2,7 +2,7 @@
 #define MODES_H
 
 void modes_init();
-void modes_run();
+void modes_run(float current);
 void modes_reset();
 unsigned long modes_getCycleElapsedTime();
 const char* modes_getStatus();

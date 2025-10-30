@@ -94,7 +94,7 @@ void ui_updateLEDs(bool r1Active, bool r1On, bool r2Active, bool r2On, uint8_t m
 
 void ui_blinkAllLEDs() {
   static unsigned long lastToggle = 0;
-  const unsigned long interval = BLINK_INTERVAL_MS;
+  const unsigned long interval = BLINK_LED_INTERVAL;
   unsigned long now = millis();
 
   if (now - lastToggle >= interval) {

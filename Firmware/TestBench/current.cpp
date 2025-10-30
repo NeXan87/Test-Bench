@@ -15,7 +15,7 @@ float current_readDC() {
 }
 
 void current_updateOverloadProtection(float current) {
-  if (current > OVERLOAD_CURRENT_LIMIT) {
+  if (current >= OVERLOAD_CURRENT_LIMIT) {
     if (!s_overloadDetected) {
       s_overloadDetected = true;
       s_overloadStartTime = millis();

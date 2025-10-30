@@ -53,6 +53,7 @@
 #define M_VPER_AMPERE 66.0f
 
 // =============== ЗАЩИТА ПО ТОКУ ===============
+#define MIN_CURRENT_BRAKE 0.3f   // Минимальный ток тормоза двигателя (А)
 #define OVERLOAD_CURRENT_LIMIT 5.1f   // Порог срабатывания (А)
 #define OVERLOAD_TIME         3000   // Время удержания (мс)
 
@@ -78,13 +79,13 @@
 #define STEP4_SIZE       50
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
-#define DISPLAY_UPDATE_INTERVAL_MS 200  // Обновление дисплея
-#define POT_UPDATE_INTERVAL_MS 150      // Частота опроса потенциометров
-#define BLINK_INTERVAL_MS 500           // Мигание при блокировке
+#define DISPLAY_UPDATE_INTERVAL 200  // Обновление дисплея
+#define POT_UPDATE_INTERVAL 150      // Частота опроса потенциометров
+#define BLINK_LED_INTERVAL 500           // Мигание при блокировке
 #define CURRENT_SAMPLES 100             // Усреднение тока
 #define STARTUP_TIMEOUT 1500            // Длительность отображения заставки при включении
-#define BRACKE_SLOW_INTERVAL_MS 1000            // Частота мигания светодиода в ожидании появления тока
-#define BRACKE_FAST_INTERVAL_MS 500            // Частота мигания светодиода в ожидании включения двигателя
+#define BRAKE_SLOW_INTERVAL 1000            // Частота мигания светодиода в ожидании появления тока
+#define BRAKE_FAST_INTERVAL 500            // Частота мигания светодиода в ожидании включения двигателя
 
 // =============== ОГРАНИЧЕНИЯ ===============
 #define MAX_DISPLAY_TIME_SEC 6000  // 100 минут в секундах (99:59 + 1)

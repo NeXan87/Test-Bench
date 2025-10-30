@@ -114,15 +114,15 @@ const char* modes_getStatus() {
   if (g_isFinished) return "  FINISH";
   if (g_isLocked) return "  LOCKED";
   if (g_isPaused) return "  PAUSED";
-  if (s_brakeBlinkSlow) return "WAIT BRK";
-  if (s_brakeBlinkFast) return "WAIT MTR";
-  if (s_brakeError) return " ERR BRK";
+  if (s_brakeBlinkSlow) return "WT BRAKE";
+  if (s_brakeBlinkFast) return "WT MOTOR";
+  if (s_brakeError) return "ER BRAKE";
   if (g_isWorking) return "    WORK";
   return "   READY";
 }
 
 bool modes_isReady() {
-  return !(g_isWorking || g_isPaused || g_isFinished || current_isOverload() || ui_isStopHeld());
+  return !(g_isWorking || g_isPaused || g_isFinished || s_brakeBlinkSlow || s_brakeBlinkFast || s_brakeError || current_isOverload() || ui_isStopHeld());
 }
 
 bool modes_isWorking() {
@@ -147,7 +147,7 @@ void modes_reset() {
   s_anyRelayActiveInGroupB = false;
 }
 
-void modes_run() {
+void modes_run(float current) {
   // Локальные повторно используемые значения — читаем один раз
   Mode mode = app_state_getMode();
   bool isGroupA = app_state_getGroupA();
@@ -403,9 +403,7 @@ void modes_run() {
           digitalWrite(RELAY1_PIN, HIGH);  // Растормозить
         }
       } else if (s_brakeBlinkSlow || s_brakeBlinkFast) {
-        float current = current_readDC();
-
-        if (current > 0.3f) {
+        if (current >= MIN_CURRENT_BRAKE) {
           s_brakeBlinkSlow = false;
           s_brakeBlinkFast = true;
 
@@ -419,7 +417,7 @@ void modes_run() {
             s_relay2Locked = true;
             s_brakeBlinkSlow = false;
             s_brakeBlinkFast = false;
-            digitalWrite(currentRelay2Pin(false), HIGH); 
+            digitalWrite(currentRelay2Pin(false), HIGH);
           }
         } else {
           s_brakeBlinkSlow = true;
@@ -429,7 +427,7 @@ void modes_run() {
     }
 
     if (s_brakeBlinkSlow || s_brakeBlinkFast) {
-      uint8_t interval = s_brakeBlinkSlow ? BRACKE_SLOW_INTERVAL_MS : BRACKE_FAST_INTERVAL_MS;
+      uint8_t interval = s_brakeBlinkSlow ? BRAKE_SLOW_INTERVAL : BRAKE_FAST_INTERVAL;
 
       if (millis() - s_brakeBlinkTime >= interval) {
         digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
@@ -454,7 +452,7 @@ void modes_run() {
     if (!s_brakeError && (s_relay1Locked || s_relay2Locked)) {
       float current = current_readDC();
 
-      if (current < 0.3f) {
+      if (current < MIN_CURRENT_BRAKE) {
         s_brakeError = true;
 
         relays_deactivateAll();

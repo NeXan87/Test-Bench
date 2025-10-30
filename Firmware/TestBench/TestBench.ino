@@ -21,12 +21,17 @@ void setup() {
 void loop() {
   static unsigned long lastPotUpdate = 0;
   static unsigned long lastDisplay = 0;
+  static unsigned long lastCurrent = 0;
+  float current = 0.0f;
 
-
-  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL_MS) {
-    float current = current_readDC();
+  if (modes_isWorking() && millis() - lastCurrent >= 100) {
+    current = current_readDC();
     current_updateOverloadProtection(current);
+  } else {
+    current = 0.0f;
+  }
 
+  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL) {
     display_update(
       app_state_getRelay1Time(),
       app_state_getDelay1Time(),
@@ -68,11 +73,11 @@ void loop() {
     app_state_readSwitches();
     relays_setGroup(currGroup ? GROUP_A : GROUP_B);
 
-    if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL_MS) {
+    if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL) {
       app_state_update();
       lastPotUpdate = millis();
     }
   }
 
-  modes_run();
+  modes_run(current);
 }
