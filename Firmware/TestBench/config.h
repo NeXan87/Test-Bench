@@ -80,6 +80,7 @@
 
 // =============== ТАЙМЕРЫ И ИНТЕРВАЛЫ ===============
 #define DISPLAY_UPDATE_INTERVAL 200  // Обновление дисплея
+#define CURRENT_UPDATE_INTERVAL 100  // Обновление дисплея
 #define POT_UPDATE_INTERVAL 150      // Частота опроса потенциометров
 #define BLINK_LED_INTERVAL 500           // Мигание при блокировке
 #define CURRENT_SAMPLES 100             // Усреднение тока

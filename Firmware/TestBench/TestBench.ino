@@ -6,6 +6,12 @@
 #include "display.h"
 #include "current.h"
 
+namespace {
+float current = 0.0f;
+Mode currMode = MODE_MANUAL_BLOCKING;
+bool isGroupA = true;
+}
+
 void setup() {
   ui_init();
   relays_init();
@@ -19,19 +25,40 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long lastPotUpdate = 0;
-  static unsigned long lastDisplay = 0;
-  static unsigned long lastCurrent = 0;
-  float current = 0.0f;
+  static unsigned long lastPotTime = 0;
+  static unsigned long lastDisplayTime = 0;
+  static unsigned long lastCurrentTime = 0;
 
-  if (modes_isWorking() && millis() - lastCurrent >= 100) {
-    current = current_readDC();
-    current_updateOverloadProtection(current);
-  } else {
+  if (modes_isReady()) {
+    currMode = app_state_getMode();
+    isGroupA = app_state_getGroupA();
+    static Mode lastMode = app_state_getMode();
+    static bool lastGroup = app_state_getGroupA();
     current = 0.0f;
+
+    if (currMode != lastMode || isGroupA != lastGroup) {
+      modes_reset();
+
+      lastMode = currMode;
+      lastGroup = isGroupA;
+    }
+
+    app_state_readSwitches();
+    relays_setGroup(isGroupA ? GROUP_A : GROUP_B);
+
+    if (millis() - lastPotTime >= POT_UPDATE_INTERVAL) {
+      app_state_update();
+      lastPotTime = millis();
+    }
+  } else {
+    if (millis() - lastCurrentTime >= CURRENT_UPDATE_INTERVAL) {
+      current = current_readDC();
+      current_updateOverloadProtection(current);
+      lastCurrentTime = millis();
+    }
   }
 
-  if (millis() - lastDisplay >= DISPLAY_UPDATE_INTERVAL) {
+  if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
     display_update(
       app_state_getRelay1Time(),
       app_state_getDelay1Time(),
@@ -40,12 +67,10 @@ void loop() {
       app_state_getCurrentCycle(),
       app_state_getCycleLimit(),
       app_state_getInfiniteCycles(),
-      (int)app_state_getMode(),
-      app_state_getGroupA(),
-      modes_getCycleElapsedTime(),
-      modes_getStatus(),
+      currMode,
+      isGroupA,
       current);
-    lastDisplay = millis();
+    lastDisplayTime = millis();
   }
 
   ui_updateButtons();
@@ -57,27 +82,5 @@ void loop() {
     return;
   }
 
-  if (modes_isReady()) {
-    static Mode lastMode = app_state_getMode();
-    static bool lastGroup = app_state_getGroupA();
-    Mode currMode = app_state_getMode();
-    bool currGroup = app_state_getGroupA();
-
-    if (currMode != lastMode || currGroup != lastGroup) {
-      modes_reset();
-
-      lastMode = currMode;
-      lastGroup = currGroup;
-    }
-
-    app_state_readSwitches();
-    relays_setGroup(currGroup ? GROUP_A : GROUP_B);
-
-    if (millis() - lastPotUpdate >= POT_UPDATE_INTERVAL) {
-      app_state_update();
-      lastPotUpdate = millis();
-    }
-  }
-
-  modes_run(current);
+  modes_run(current, currMode, isGroupA);
 }

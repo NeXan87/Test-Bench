@@ -147,10 +147,7 @@ void modes_reset() {
   s_anyRelayActiveInGroupB = false;
 }
 
-void modes_run(float current) {
-  // Локальные повторно используемые значения — читаем один раз
-  Mode mode = app_state_getMode();
-  bool isGroupA = app_state_getGroupA();
+void modes_run(float current, int currMode, bool isGroupA) {
   const uint8_t r1_pin = currentRelay1Pin(isGroupA);
   const uint8_t r2_pin = currentRelay2Pin(isGroupA);
 
@@ -158,7 +155,7 @@ void modes_run(float current) {
   g_isFinished = false;
 
   // Блокировка (режимы 1 и 2 запрещены для группы B)
-  const bool isBlocked = !isGroupA && mode == MODE_ASYNC_AUTO;
+  const bool isBlocked = !isGroupA && currMode == MODE_ASYNC_AUTO;
 
   // Обновляем флаг блокировки
   g_isLocked = isBlocked;
@@ -176,7 +173,7 @@ void modes_run(float current) {
   }
 
   // Режимы manual: определяем, работает ли система (есть ли реле включённые)
-  if (mode == MODE_MANUAL_BLOCKING || mode == MODE_MANUAL_INDEPENDENT) {
+  if (currMode == MODE_MANUAL_BLOCKING || currMode == MODE_MANUAL_INDEPENDENT) {
     g_isFinished = false;
     bool r1On = (digitalRead(r1_pin) == HIGH);
     bool r2On = (digitalRead(r2_pin) == HIGH);
@@ -184,7 +181,7 @@ void modes_run(float current) {
   }
 
   // ---------------- MANUAL BLOCKING ----------------
-  if (mode == MODE_MANUAL_BLOCKING) {
+  if (currMode == MODE_MANUAL_BLOCKING) {
     if (isGroupA) {
       if (ui_start1Pressed()) relays_activateFirst(true);
       if (ui_start2Pressed()) relays_activateSecond(true);
@@ -216,7 +213,7 @@ void modes_run(float current) {
   }
 
   // ---------------- SYNC AUTO ----------------
-  if (mode == MODE_SYNC_AUTO) {
+  if (currMode == MODE_SYNC_AUTO) {
     s_a1.active = s_a2.active = false;
     g_isFinished = (s_sync == FINISHED);
     g_isWorking = s_syncActive && !g_isFinished;
@@ -331,7 +328,7 @@ void modes_run(float current) {
   }
 
   // ---------------- ASYNC AUTO ----------------
-  if (mode == MODE_ASYNC_AUTO) {
+  if (currMode == MODE_ASYNC_AUTO) {
     g_isFinished = false;
     g_isWorking = s_a1.active || s_a2.active;
 
@@ -375,7 +372,7 @@ void modes_run(float current) {
   }
 
   // ---------------- MANUAL INDEPENDENT ----------------
-  if (mode == MODE_MANUAL_INDEPENDENT) {
+  if (currMode == MODE_MANUAL_INDEPENDENT) {
     if (isGroupA) {
       if (ui_start1Pressed()) {
         bool state = digitalRead(r1_pin);

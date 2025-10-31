@@ -1,6 +1,7 @@
 #include "display.h"
 #include "config.h"
 #include "utils.h"
+#include "modes.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -29,8 +30,6 @@ void display_update(
   bool infinite,
   uint8_t mode,
   bool groupA,
-  unsigned long cycleTimeMs,
-  const char* status,
   float current) {
 
   // --- статические значения для сравнения ---
@@ -41,8 +40,10 @@ void display_update(
   static uint8_t prev_mode = 255;
   static float prev_current = -1.0;
   static char prev_status[17] = "";
-
   char buffer[12];
+
+  const char* status = modes_getStatus();
+  unsigned long cycleTime = modes_getCycleElapsedTime();
 
   // ===========================================================
   // 1️⃣ Разметка экрана (печатается один раз при первом вызове)
@@ -137,10 +138,10 @@ void display_update(
   }
 
   // ---- Cycle Time ----
-  if (cycleTimeMs != prev_cycleTime) {
+  if (cycleTime != prev_cycleTime) {
     lcd.setCursor(2, 3);
-    lcd.print(utils_formatCycleTime(cycleTimeMs));
-    prev_cycleTime = cycleTimeMs;
+    lcd.print(utils_formatCycleTime(cycleTime));
+    prev_cycleTime = cycleTime;
   }
 
   // ---- Status ----

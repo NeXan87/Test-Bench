@@ -13,8 +13,6 @@ void display_update(
   bool infinite,
   uint8_t mode,
   bool groupA,
-  unsigned long cycleTimeMs,
-  const char* status,
   float current
 );
 
