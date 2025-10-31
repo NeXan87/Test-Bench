@@ -59,17 +59,7 @@ void loop() {
   }
 
   if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
-    display_update(
-      app_state_getRelay1Time(),
-      app_state_getDelay1Time(),
-      app_state_getRelay2Time(),
-      app_state_getDelay2Time(),
-      app_state_getCurrentCycle(),
-      app_state_getCycleLimit(),
-      app_state_getInfiniteCycles(),
-      currMode,
-      isGroupA,
-      current);
+    display_update(currMode, isGroupA, current);
     lastDisplayTime = millis();
   }
 

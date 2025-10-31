@@ -1,3 +1,4 @@
+#include "app_state.h"
 #include "display.h"
 #include "config.h"
 #include "utils.h"
@@ -22,28 +23,26 @@ void display_clear() {
   lcd.clear();
 }
 
-void display_update(
-  unsigned long t1, unsigned long d1,
-  unsigned long t2, unsigned long d2,
-  int currentCycle,
-  int totalCycles,
-  bool infinite,
-  uint8_t mode,
-  bool groupA,
-  float current) {
-
+void display_update(uint8_t mode, bool groupA, float current) {
   // --- статические значения для сравнения ---
   static bool layoutDrawn = false;  // ← чтобы макет выводился один раз
-  static unsigned long prev_t1 = 0, prev_d1 = 0, prev_t2 = 0, prev_d2 = 0, prev_cycleTime = -1;
+  static unsigned long prev_relay1Time = 0, prev_delay1Time = 0, prev_relay2Time = 0, prev_delay2Time = 0, prev_cycleTime = -1;
   static uint16_t prev_currentCycle = 0, prev_totalCycles = 0;
-  static bool prev_infinite = false, prev_groupA = false;
+  static bool prev_isInfiniteCycles = false, prev_groupA = false;
   static uint8_t prev_mode = 255;
   static float prev_current = -1.0;
   static char prev_status[17] = "";
   char buffer[12];
 
-  const char* status = modes_getStatus();
+  unsigned long relay1Time = app_state_getRelay1Time();
+  unsigned long delay1Time = app_state_getDelay1Time();
+  unsigned long relay2Time = app_state_getRelay2Time();
+  unsigned long delay2Time = app_state_getDelay2Time();
   unsigned long cycleTime = modes_getCycleElapsedTime();
+  int currentCycle = app_state_getCurrentCycle();
+  int totalCycles = app_state_getCycleLimit();
+  bool isInfiniteCycles = app_state_getInfiniteCycles();
+  const char* status = modes_getStatus();
 
   // ===========================================================
   // 1️⃣ Разметка экрана (печатается один раз при первом вызове)
@@ -75,17 +74,17 @@ void display_update(
   // 2️⃣ Умное обновление значений
   // ===========================================================
 
-  // ---- T1 / D1 / Mode ----
-  if (t1 != prev_t1) {
+  // ---- relay1Time / delay1Time / Mode ----
+  if (relay1Time != prev_relay1Time) {
     lcd.setCursor(3, 0);
-    lcd.print(utils_formatTimeSec(t1));
-    prev_t1 = t1;
+    lcd.print(utils_formatTimeSec(relay1Time));
+    prev_relay1Time = relay1Time;
   }
 
-  if (d1 != prev_d1) {
+  if (delay1Time != prev_delay1Time) {
     lcd.setCursor(11, 0);
-    lcd.print(utils_formatTimeSec(d1));
-    prev_d1 = d1;
+    lcd.print(utils_formatTimeSec(delay1Time));
+    prev_delay1Time = delay1Time;
   }
 
   if (mode != prev_mode) {
@@ -94,17 +93,17 @@ void display_update(
     prev_mode = mode;
   }
 
-  // ---- T2 / D2 / Group ----
-  if (t2 != prev_t2) {
+  // ---- relay2Time / delay2Time / Group ----
+  if (relay2Time != prev_relay2Time) {
     lcd.setCursor(3, 1);
-    lcd.print(utils_formatTimeSec(t2));
-    prev_t2 = t2;
+    lcd.print(utils_formatTimeSec(relay2Time));
+    prev_relay2Time = relay2Time;
   }
 
-  if (d2 != prev_d2) {
+  if (delay2Time != prev_delay2Time) {
     lcd.setCursor(11, 1);
-    lcd.print(utils_formatTimeSec(d2));
-    prev_d2 = d2;
+    lcd.print(utils_formatTimeSec(delay2Time));
+    prev_delay2Time = delay2Time;
   }
 
   if (groupA != prev_groupA) {
@@ -114,16 +113,16 @@ void display_update(
   }
 
   // ---- Cycle counter ----
-  if (currentCycle != prev_currentCycle || totalCycles != prev_totalCycles || infinite != prev_infinite) {
+  if (currentCycle != prev_currentCycle || totalCycles != prev_totalCycles || isInfiniteCycles != prev_isInfiniteCycles) {
     lcd.setCursor(2, 2);
-    if (infinite)
+    if (isInfiniteCycles)
       snprintf(buffer, sizeof(buffer), "%04d/INF ", currentCycle);
     else
       snprintf(buffer, sizeof(buffer), "%04d/%04d", currentCycle, totalCycles);
     lcd.print(buffer);
     prev_currentCycle = currentCycle;
     prev_totalCycles = totalCycles;
-    prev_infinite = infinite;
+    prev_isInfiniteCycles = isInfiniteCycles;
   }
 
   // ---- Current ----
