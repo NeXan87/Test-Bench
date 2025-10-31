@@ -7,7 +7,7 @@
 namespace {
 Mode s_mode = MODE_MANUAL_BLOCKING;
 bool s_groupA = true;
-unsigned long s_t1 = 1000, s_d1 = 1000, s_t2 = 1000, s_d2 = 1000;
+unsigned long s_relay1 = 1000, s_delay1 = 1000, s_relay2 = 1000, s_delay2 = 1000;
 int s_cycles = 1;
 bool s_inf = false;
 int s_currentCycle = 0;
@@ -59,6 +59,8 @@ bool app_state_readSwitches() {
 // =========================================================
 // --- Обновление состояний потенциометров с антидребезгом ---
 void app_state_update() {
+  const bool minDelayRequired = (!s_groupA) || (s_mode == MODE_ASYNC_AUTO);
+
   // 1️⃣ Считываем "сырые" значения АЦП
   int adc_on1 = analogRead(POT_ON1_PIN);
   int adc_d1 = analogRead(POT_DELAY1_PIN);
@@ -74,28 +76,33 @@ void app_state_update() {
   f_cycles = smooth(f_cycles, adc_cycles);
 
   // 3️⃣ Пересчитываем в миллисекунды
-  unsigned long raw_t1 = mapFast((int)f_on1, 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
-  unsigned long raw_t2 = mapFast((int)f_on2, 0, 1023, MIN_ON_TIME, MAX_ON_TIME);
-  unsigned long raw_delay1 = mapFast((int)f_d1, 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
-  unsigned long raw_delay2 = mapFast((int)f_d2, 0, 1023, MIN_DELAY_TIME, MAX_DELAY_TIME);
+  unsigned long raw_relay1 = mapFast((int)f_on1, 0, 1023, MIN_ON_RELAY1_TIME, MAX_ON_RELAY1_TIME);
+  unsigned long raw_relay2 = 0, raw_delay1 = 0, raw_delay2 = 0;
 
-  // 4️⃣ Применяем ограничения и режимы
   if (s_mode == MODE_SYNC_AUTO) {
-    s_t1 = ensureMin(raw_t1, 1000);
-    s_t2 = raw_t2;
+    raw_relay2 = mapFast((int)f_on2, 0, 1023, MIN_ON_RELAY2_TIME_SYNC, MAX_ON_RELAY2_TIME);
   } else {
-    const bool allowZeroT2 = (!s_groupA) || (s_mode == MODE_MANUAL_INDEPENDENT);
-    s_t1 = ensureMin(raw_t1, 1000);
-    s_t2 = allowZeroT2 ? raw_t2 : ensureMin(raw_t2, 1000);
+    raw_relay2 = mapFast((int)f_on2, 0, 1023, MIN_ON_RELAY2_TIME_ASYNC, MAX_ON_RELAY2_TIME);
   }
 
-  const bool minDelayRequired = (!s_groupA) || (s_mode == MODE_ASYNC_AUTO);
   if (minDelayRequired) {
-    s_d1 = ensureMin(raw_delay1, 1000);
-    s_d2 = ensureMin(raw_delay2, 1000);
+    raw_delay1 = mapFast((int)f_d1, 0, 1023, MIN_DELAY_TIME_GROUP_B, MAX_DELAY_TIME);
+    raw_delay2 = mapFast((int)f_d2, 0, 1023, MIN_DELAY_TIME_GROUP_B, MAX_DELAY_TIME);
   } else {
-    s_d1 = raw_delay1;
-    s_d2 = raw_delay2;
+    raw_delay1 = mapFast((int)f_d1, 0, 1023, MIN_DELAY_TIME_GROUP_A, MAX_DELAY_TIME);
+    raw_delay2 = mapFast((int)f_d2, 0, 1023, MIN_DELAY_TIME_GROUP_A, MAX_DELAY_TIME);
+  }
+
+  // 4️⃣ Применяем ограничения и режимы
+  s_relay1 = raw_relay1;
+  s_delay1 = raw_relay2 < 1000 ? MIN_DELAY_TIME_GROUP_B : raw_delay1;
+
+  if (s_mode == MODE_SYNC_AUTO) {
+    s_relay2 = raw_relay2 < 1000 ? 0 : raw_relay2;
+    s_delay2 = raw_relay2 < 1000 ? 0 : raw_delay2;
+  } else {
+    s_relay2 = raw_relay2;
+    s_delay2 = raw_delay2;
   }
 
   // 5️⃣ Потенциометр циклов
@@ -122,7 +129,7 @@ void app_state_update() {
       } else if (rawCycles <= STEP2_MAX) {
         s_cycles = ((rawCycles - STEP1_MAX - 1) / STEP2_SIZE) * STEP2_SIZE + STEP1_MAX;
       } else if (rawCycles <= STEP3_MAX) {
-        s_cycles = ((rawCycles - STEP2_MAX - 1) / STEP3_SIZE) * STEP3_SIZE + STEP2_MAX ;
+        s_cycles = ((rawCycles - STEP2_MAX - 1) / STEP3_SIZE) * STEP3_SIZE + STEP2_MAX;
       } else {
         s_cycles = ((rawCycles - STEP3_MAX - 1) / STEP4_SIZE) * STEP4_SIZE + STEP3_MAX;
       }
@@ -148,16 +155,16 @@ bool app_state_getGroupA() {
   return s_groupA;
 }
 unsigned long app_state_getRelay1Time() {
-  return s_t1;
+  return s_relay1;
 }
 unsigned long app_state_getDelay1Time() {
-  return s_d1;
+  return s_delay1;
 }
 unsigned long app_state_getRelay2Time() {
-  return s_t2;
+  return s_relay2;
 }
 unsigned long app_state_getDelay2Time() {
-  return s_d2;
+  return s_delay2;
 }
 int app_state_getCycleLimit() {
   return s_cycles;
