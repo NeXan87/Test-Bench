@@ -7,6 +7,7 @@ void modes_reset();
 unsigned long modes_getCycleElapsedTime();
 const char* modes_getStatus();
 bool modes_isWorking();
+bool modes_isBrakeState();
 bool modes_isPaused();
 bool modes_isFinished();
 bool modes_isReady();

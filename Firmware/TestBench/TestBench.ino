@@ -34,7 +34,6 @@ void loop() {
     isGroupA = app_state_getGroupA();
     static Mode lastMode = app_state_getMode();
     static bool lastGroup = app_state_getGroupA();
-    current = 0.0f;
 
     if (currMode != lastMode || isGroupA != lastGroup) {
       modes_reset();
@@ -50,12 +49,16 @@ void loop() {
       app_state_update();
       lastPotTime = millis();
     }
-  } else {
+  }
+
+  if (modes_isWorking() || modes_isBrakeState()) {
     if (millis() - lastCurrentTime >= CURRENT_UPDATE_INTERVAL) {
       current = current_readDC();
       current_updateOverloadProtection(current);
       lastCurrentTime = millis();
     }
+  } else {
+    current = 0.0f;
   }
 
   if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {

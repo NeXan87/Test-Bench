@@ -125,6 +125,10 @@ bool modes_isReady() {
   return !(g_isWorking || g_isPaused || g_isFinished || s_brakeBlinkSlow || s_brakeBlinkFast || s_brakeError || current_isOverload() || ui_isStopHeld());
 }
 
+bool modes_isBrakeState() {
+  return s_brakeBlinkSlow || s_brakeBlinkFast || s_brakeError;
+}
+
 bool modes_isWorking() {
   return g_isWorking;
 }
