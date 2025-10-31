@@ -39,17 +39,15 @@
 #define LCD_COLS 20
 #define LCD_ROWS 4
 
-// =============== ВРЕМЕННЫЕ ДИАПАЗОНЫ (мс) ===============
-#define MIN_ON_RELAY1_TIME 1000   // 1 сек
-#define MAX_ON_RELAY1_TIME 60000  // 60 сек
-#define MIN_ON_RELAY2_TIME 0      // 0 сек
-#define MAX_ON_RELAY2_TIME 60000  // 60 сек
-#define MIN_DELAY_TIME_GROUP_A 0       // 0 сек (для группы A)
-#define MIN_DELAY_TIME_GROUP_B 1000    // 1 сек (для группы B и режима 4)
-#define MAX_DELAY_TIME 60000      // 60 сек
-
-#define MIN_ON_RELAY2_TIME_SYNC 0           // Минимальное время работы реле в режиме Авто (3): синхронный
-#define MIN_ON_RELAY2_TIME_ASYNC 1000  // Минимальное время работы реле в режиме Авто (4): асинхронный
+// =============== ВРЕМЕННЫЕ ДИАПАЗОНЫ (секунды) ===============
+#define MIN_ON_RELAY1_TIME 1      // Минимальное время работы реле 1
+#define MAX_ON_RELAY1_TIME 60     // Максимальное время работы реле 1
+#define MIN_ON_RELAY2_TIME_SYNC 0   // Минимальное время работы реле 2 в режиме Авто (3): синхронный
+#define MIN_ON_RELAY2_TIME_ASYNC 1  // Минимальное время работы реле 2 в режиме Авто (4): асинхронный
+#define MAX_ON_RELAY2_TIME 60     // Максимальное время работы реле 2
+#define MIN_DELAY_TIME_GROUP_A 0  // Минимальная задержка для группы A
+#define MIN_DELAY_TIME_GROUP_B 1  // Минимальная задержка для группы для группы B и режима 4
+#define MAX_DELAY_TIME 60         // 60 сек
 
 // =============== КАЛИБРОВКА ТОКА ===============
 // ACS712-5A: 185 mV/A

@@ -57,6 +57,7 @@ void loop() {
       current_updateOverloadProtection(current);
       lastCurrentTime = millis();
     }
+    
   } else {
     current = 0.0f;
   }
