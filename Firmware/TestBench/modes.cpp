@@ -54,10 +54,10 @@ inline void setSyncState(SyncState st) {
 }
 
 inline uint8_t currentRelay1Pin(bool groupA) {
-  return groupA ? RELAY1_PIN : RELAY3_PIN;
+  return groupA ? RELAY1_24V_PIN : RELAY3_380V_PIN;
 }
 inline uint8_t currentRelay2Pin(bool groupA) {
-  return groupA ? RELAY2_PIN : RELAY4_PIN;
+  return groupA ? RELAY2_24V_PIN : RELAY4_380V_PIN;
 }
 
 void resetBrakeActive() {
@@ -401,7 +401,7 @@ void modes_run(float current, int currMode, bool isGroupA) {
           s_brakeActive = true;
           s_brakeBlinkSlow = true;
           s_brakeBlinkTime = millis();
-          digitalWrite(RELAY1_PIN, HIGH);  // Растормозить
+          digitalWrite(RELAY1_24V_PIN, HIGH);  // Растормозить
         }
       } else if (s_brakeBlinkSlow || s_brakeBlinkFast) {
         if (current >= MIN_CURRENT_BRAKE) {

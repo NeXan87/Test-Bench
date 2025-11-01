@@ -5,7 +5,7 @@ static uint8_t s_r1, s_r2;
 
 // --- Массив всех реле ---
 static const uint8_t RELAY_PINS[] = {
-  RELAY1_PIN, RELAY2_PIN, RELAY3_PIN, RELAY4_PIN
+  RELAY1_24V_PIN, RELAY2_24V_PIN, RELAY3_380V_PIN, RELAY4_380V_PIN
 };
 constexpr uint8_t RELAY_COUNT = sizeof(RELAY_PINS);
 
@@ -18,11 +18,11 @@ void relays_init() {
 
 void relays_setGroup(RelayGroup group) {
   if (group == GROUP_A) {
-    s_r1 = RELAY1_PIN;
-    s_r2 = RELAY2_PIN;
+    s_r1 = RELAY1_24V_PIN;
+    s_r2 = RELAY2_24V_PIN;
   } else {
-    s_r1 = RELAY3_PIN;
-    s_r2 = RELAY4_PIN;
+    s_r1 = RELAY3_380V_PIN;
+    s_r2 = RELAY4_380V_PIN;
   }
 }
 
