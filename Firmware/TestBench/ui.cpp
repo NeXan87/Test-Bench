@@ -6,7 +6,7 @@ Bounce g_btn2;
 Bounce g_btnStop;
 
 // --- Пины в массивах для компактности ---
-const uint8_t LED_PINS[] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN };
+const uint8_t LED_PINS[] = { LED_ON1_PIN, LED2_DELAY1_PIN, LED_ON2_PIN, LED4_DELAY2_PIN };
 constexpr uint8_t LED_COUNT = sizeof(LED_PINS);
 
 // ==========================
@@ -15,13 +15,13 @@ constexpr uint8_t LED_COUNT = sizeof(LED_PINS);
 
 void ui_init() {
   // Кнопки
-  pinMode(START1_PIN, INPUT_PULLUP);
-  pinMode(START2_PIN, INPUT_PULLUP);
-  pinMode(STOP_PIN, INPUT_PULLUP);
+  pinMode(START1_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
 
-  g_btn1.attach(START1_PIN, INPUT_PULLUP);
-  g_btn2.attach(START2_PIN, INPUT_PULLUP);
-  g_btnStop.attach(STOP_PIN, INPUT_PULLUP);
+  g_btn1.attach(START1_BUTTON_PIN, INPUT_PULLUP);
+  g_btn2.attach(START2_BUTTON_PIN, INPUT_PULLUP);
+  g_btnStop.attach(STOP_BUTTON_PIN, INPUT_PULLUP);
 
   g_btn1.interval(25);
   g_btn2.interval(25);

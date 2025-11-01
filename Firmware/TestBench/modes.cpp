@@ -208,10 +208,10 @@ void modes_run(float current, int currMode, bool isGroupA) {
       }
 
       // Индикация (фиксированные LED позиции)
-      digitalWrite(LED1_PIN, r1On);
-      digitalWrite(LED2_PIN, LOW);
-      digitalWrite(LED3_PIN, r2On);
-      digitalWrite(LED4_PIN, LOW);
+      digitalWrite(LED_ON1_PIN, r1On);
+      digitalWrite(LED2_DELAY1_PIN, LOW);
+      digitalWrite(LED_ON2_PIN, r2On);
+      digitalWrite(LED4_DELAY2_PIN, LOW);
     }
     return;
   }
@@ -313,10 +313,10 @@ void modes_run(float current, int currMode, bool isGroupA) {
       case FINISHED:
         s_cycleRunning = false;
         // гасим все LED
-        digitalWrite(LED1_PIN, LOW);
-        digitalWrite(LED2_PIN, LOW);
-        digitalWrite(LED3_PIN, LOW);
-        digitalWrite(LED4_PIN, LOW);
+        digitalWrite(LED_ON1_PIN, LOW);
+        digitalWrite(LED2_DELAY1_PIN, LOW);
+        digitalWrite(LED_ON2_PIN, LOW);
+        digitalWrite(LED4_DELAY2_PIN, LOW);
         return;
 
       default:
@@ -324,10 +324,10 @@ void modes_run(float current, int currMode, bool isGroupA) {
     }
 
     // Индикация по текущему состоянию синхрона
-    digitalWrite(LED1_PIN, s_sync == R1_ON ? HIGH : LOW);
-    digitalWrite(LED2_PIN, s_sync == D1 ? HIGH : LOW);
-    digitalWrite(LED3_PIN, s_sync == R2_ON ? HIGH : LOW);
-    digitalWrite(LED4_PIN, s_sync == D2 ? HIGH : LOW);
+    digitalWrite(LED_ON1_PIN, s_sync == R1_ON ? HIGH : LOW);
+    digitalWrite(LED2_DELAY1_PIN, s_sync == D1 ? HIGH : LOW);
+    digitalWrite(LED_ON2_PIN, s_sync == R2_ON ? HIGH : LOW);
+    digitalWrite(LED4_DELAY2_PIN, s_sync == D2 ? HIGH : LOW);
     return;
   }
 
@@ -386,10 +386,10 @@ void modes_run(float current, int currMode, bool isGroupA) {
         bool state = digitalRead(r2_pin);
         digitalWrite(r2_pin, !state);
       }
-      digitalWrite(LED1_PIN, digitalRead(r1_pin));
-      digitalWrite(LED2_PIN, LOW);
-      digitalWrite(LED3_PIN, digitalRead(r2_pin));
-      digitalWrite(LED4_PIN, LOW);
+      digitalWrite(LED_ON1_PIN, digitalRead(r1_pin));
+      digitalWrite(LED2_DELAY1_PIN, LOW);
+      digitalWrite(LED_ON2_PIN, digitalRead(r2_pin));
+      digitalWrite(LED4_DELAY2_PIN, LOW);
       return;
     } else {
       bool r1On = (digitalRead(r1_pin) == HIGH);
@@ -431,21 +431,21 @@ void modes_run(float current, int currMode, bool isGroupA) {
       uint8_t interval = s_brakeBlinkSlow ? BRAKE_SLOW_INTERVAL : BRAKE_FAST_INTERVAL;
 
       if (millis() - s_brakeBlinkTime >= interval) {
-        digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
+        digitalWrite(LED_ON1_PIN, !digitalRead(LED_ON1_PIN));
         s_brakeBlinkTime = millis();
       }
     } else {
       if (s_brakeBlinkTime != 0) {
-        digitalWrite(LED1_PIN, LOW);
+        digitalWrite(LED_ON1_PIN, LOW);
         s_brakeBlinkSlow = false;
         s_brakeBlinkFast = false;
         s_brakeBlinkTime = 0;
       }
 
       if (s_relay1Locked) {
-        digitalWrite(LED1_PIN, digitalRead(r1_pin));
+        digitalWrite(LED_ON1_PIN, digitalRead(r1_pin));
       } else if (s_relay2Locked) {
-        digitalWrite(LED3_PIN, digitalRead(r2_pin));
+        digitalWrite(LED_ON2_PIN, digitalRead(r2_pin));
       }
     }
 

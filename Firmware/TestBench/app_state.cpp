@@ -33,16 +33,16 @@ inline unsigned long mapFast(int x, int in_min, int in_max, unsigned long out_mi
 // =========================================================
 // --- Инициализация ---
 void app_state_init() {
-  pinMode(MODE0_PIN, INPUT_PULLUP);
-  pinMode(MODE1_PIN, INPUT_PULLUP);
-  pinMode(GROUP_PIN, INPUT_PULLUP);
+  pinMode(MODE0_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(MODE1_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(GROUP_SWITCH_PIN, INPUT_PULLUP);
 }
 
 // =========================================================
 // --- Чтение переключателей режима/группы ---
 bool app_state_readSwitches() {
-  const bool m0 = !digitalRead(MODE0_PIN);
-  const bool m1 = !digitalRead(MODE1_PIN);
+  const bool m0 = !digitalRead(MODE0_SWITCH_PIN);
+  const bool m1 = !digitalRead(MODE1_SWITCH_PIN);
 
   // Комбинации двух переключателей (2 бита)
   switch ((m1 << 1) | m0) {
@@ -52,7 +52,7 @@ bool app_state_readSwitches() {
     case 0b11: s_mode = MODE_MANUAL_INDEPENDENT; break;
   }
 
-  s_groupA = !digitalRead(GROUP_PIN);  // LOW = группа A
+  s_groupA = !digitalRead(GROUP_SWITCH_PIN);  // LOW = группа A
   return true;
 }
 
