@@ -67,8 +67,6 @@ void loop() {
     lastDisplayTime = millis();
   }
 
-  ui_updateButtons();
-
   // === АВАРИЙНЫЙ РЕЖИМ: пока удерживается СТОП ===
   if (ui_isStopHeld()) {
     modes_reset();
@@ -76,5 +74,6 @@ void loop() {
     return;
   }
 
+  ui_updateButtons();
   modes_run(current, currMode, isGroupA);
 }
