@@ -71,6 +71,8 @@
 | SDA     | A4           |
 | SCL     | A5           |
 
+![Принципиальная схема испытательного стенда на Arduino Nano](https://github.com/NeXan87/Test-Bench/blob/main/Electric%20Diagram/TestBench.png?raw=true)
+
 ## ⚙️ Режимы работы
 
 ### Выбор режима (переключатель D0/D1)
@@ -86,8 +88,6 @@
 
 - **LOW**: Группа A (реле 1=D4, реле 2=D5)
 - **HIGH**: Группа B (пускатель 3=D2, пускатель 4=D3)
-
-![Принципиальная схема испытательного стенда на Arduino Nano](https://github.com/NeXan87/Test-Bench/blob/main/Electric%20Diagram/TestBench.png?raw=true)
 
 ### Особенности режимов
 
