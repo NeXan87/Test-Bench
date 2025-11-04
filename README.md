@@ -32,6 +32,8 @@
 
 ## 📐 Схема подключения
 
+![Принципиальная схема испытательного стенда на Arduino Nano](https://github.com/NeXan87/Test-Bench/blob/main/Electric%20Diagram/TestBench.png?raw=true)
+
 ### Цифровые пины
 
 | Пин | Компонент                         |
@@ -70,8 +72,6 @@
 | GND     | GND          |
 | SDA     | A4           |
 | SCL     | A5           |
-
-![Принципиальная схема испытательного стенда на Arduino Nano](https://github.com/NeXan87/Test-Bench/blob/main/Electric%20Diagram/TestBench.png?raw=true)
 
 ## ⚙️ Режимы работы
 
