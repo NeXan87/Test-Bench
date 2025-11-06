@@ -58,7 +58,7 @@ void display_update(uint8_t mode, bool groupA, float current) {
     lcd.setCursor(0, 1);
     lcd.print(F("R2   s  D2   s  G"));
     lcd.setCursor(0, 2);
-    lcd.print(F("C            I     A"));
+    lcd.print(F("C            I"));
     lcd.setCursor(0, 3);
     lcd.print(F("T"));
 
@@ -126,13 +126,10 @@ void display_update(uint8_t mode, bool groupA, float current) {
   }
 
   // ---- Current ----
-  if (fabs(current - prev_current) > 0.1f) {
+  if (fabs(current - prev_current) > 0.01f) {
     lcd.setCursor(15, 2);
-    if (current >= 10.0f) {
-      lcd.print(current, 1);
-    } else {
-      lcd.print(current);
-    }
+    lcd.print(current, 1);
+    lcd.print(F("A "));
     prev_current = current;
   }
 

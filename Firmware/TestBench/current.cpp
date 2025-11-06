@@ -2,7 +2,7 @@
 #include "config.h"
 #include <ACS712.h>  // Библиотека RobTillaart
 
-ACS712 sensor(CURRENT_SENSOR_PIN, 5.0, 1024, M_VPER_AMPERE);
+ACS712 sensor(CURRENT_SENSOR_PIN, VOLTAGE_ACS712, 1024, M_VPER_AMPERE);
 
 namespace {
 bool s_overloadDetected = false;
@@ -11,7 +11,18 @@ bool g_isOverload = false;
 }
 
 float current_readDC() {
-  return sensor.mA_DC(1) / 1000.0f;  // в амперах
+  static float filtered = 0.0f;   // сохраняется между вызовами
+
+  // Сырое значение в амперах
+  float raw = fabs(sensor.mA_DC(CURRENT_SAMPLES) / 1000.0f);
+
+  // Фильтр EMA (экспоненциальное скользящее среднее)
+  filtered = filtered + CURRENT_ALPHA * (raw - filtered);
+
+  // Округление до одного знака после запятой
+  float rounded = round(filtered * 10.0f) / 10.0f;
+
+  return rounded;
 }
 
 void current_updateOverloadProtection(float current) {

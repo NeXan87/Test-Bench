@@ -51,21 +51,18 @@ void loop() {
     }
   }
 
-  if (modes_isWorking() || modes_isBrakeState()) {
-    if (millis() - lastCurrentTime >= CURRENT_UPDATE_INTERVAL) {
-      current = current_readDC();
-      current_updateOverloadProtection(current);
-      lastCurrentTime = millis();
-    }
-    
-  } else {
-    current = 0.0f;
+  if (millis() - lastCurrentTime >= CURRENT_UPDATE_INTERVAL) {
+    current = current_readDC();
+    current_updateOverloadProtection(current);
+    lastCurrentTime = millis();
   }
 
   if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
     display_update(currMode, isGroupA, current);
     lastDisplayTime = millis();
   }
+
+  ui_updateButtons();
 
   // === АВАРИЙНЫЙ РЕЖИМ: пока удерживается СТОП ===
   if (ui_isStopHeld()) {
@@ -74,6 +71,5 @@ void loop() {
     return;
   }
 
-  ui_updateButtons();
   modes_run(current, currMode, isGroupA);
 }
