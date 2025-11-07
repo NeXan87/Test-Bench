@@ -67,7 +67,6 @@ void loop() {
   // === АВАРИЙНЫЙ РЕЖИМ: пока удерживается СТОП ===
   if (ui_isStopHeld()) {
     modes_reset();
-    delay(10);
     return;
   }
 
