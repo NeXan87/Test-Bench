@@ -26,6 +26,9 @@ inline float smooth(float prev, int raw, float alpha = 0.7f) {
 
 // Быстрый inline map
 inline unsigned long mapFast(int x, int in_min, int in_max, unsigned long out_min, unsigned long out_max) {
+  if (in_max <= in_min) {
+    return out_min;  // или out_max — по умолчанию
+  }
   return (unsigned long)((x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min);
 }
 }
