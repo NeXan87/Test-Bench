@@ -2,6 +2,7 @@
 #include "display.h"
 #include "config.h"
 #include "utils.h"
+#include "app_state.h"
 #include "modes.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -23,7 +24,7 @@ void display_clear() {
   lcd.clear();
 }
 
-void display_update(uint8_t mode, bool groupA, float current) {
+void display_update(Mode mode, bool groupA, float current) {
   // --- статические значения для сравнения ---
   static bool layoutDrawn = false;  // ← чтобы макет выводился один раз
   static unsigned long prev_relay1Time = 0, prev_delay1Time = 0, prev_relay2Time = 0, prev_delay2Time = 0, prev_cycleTime = -1;

@@ -5,6 +5,6 @@
 
 void display_init();
 void display_clear();
-void display_update(uint8_t mode, bool groupA, float current);
+void display_update(Mode mode, bool groupA, float current);
 
 #endif
