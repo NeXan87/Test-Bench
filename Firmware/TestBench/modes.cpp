@@ -489,8 +489,11 @@ void modes_run(float current, int currMode, bool isGroupA) {
         }
       } else if (s_brakeBlinkSlow || s_brakeBlinkFast) {
         if (current >= MIN_CURRENT_BRAKE) {
-          s_brakeBlinkSlow = false;
-          s_brakeBlinkFast = true;
+          if (s_brakeBlinkSlow) {
+            s_brakeBlinkSlow = false;
+            s_brakeBlinkFast = true;
+            s_brakeBlinkTime = millis();  // ← СБРОС ТАЙМЕРА ПРИ ПЕРЕХОДЕ
+          }
 
           if (!s_relay1Locked && ui_start1Pressed() && !r1On && !r2On) {
             s_relay1Locked = true;
@@ -505,8 +508,11 @@ void modes_run(float current, int currMode, bool isGroupA) {
             digitalWrite(currentRelay2Pin(false), HIGH);
           }
         } else {
-          s_brakeBlinkSlow = true;
-          s_brakeBlinkFast = false;
+          if (s_brakeBlinkFast) {
+            s_brakeBlinkFast = false;
+            s_brakeBlinkSlow = true;
+            s_brakeBlinkTime = millis();  // ← СБРОС ТАЙМЕРА ПРИ ПЕРЕХОДЕ
+          }
         }
       }
     }
