@@ -69,7 +69,9 @@ bool ui_isStopHeld() {
 // ==========================
 
 inline void ui_setLED(uint8_t index, bool state) {
-  digitalWrite(LED_PINS[index], state ? HIGH : LOW);
+  if (index < LED_COUNT) {
+    digitalWrite(LED_PINS[index], state ? HIGH : LOW);
+  }
 }
 
 void ui_clearLEDs() {
