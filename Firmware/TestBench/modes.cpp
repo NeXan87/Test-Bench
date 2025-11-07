@@ -91,16 +91,35 @@ inline void handleAsyncRelay(AsyncRelay& ar, uint8_t pin, unsigned long tOn, uns
   if (!ar.active) return;
 
   if (ar.onPhase) {
-    if (now - ar.phaseStart >= tOn) {
+    if (tOn == 0) {
+      // Немедленно завершаем фазу включения
+      digitalWrite(pin, LOW);
+      ar.onPhase = false;
+      ar.phaseStart = now;
+    } else if (now - ar.phaseStart >= tOn) {
       digitalWrite(pin, LOW);
       ar.onPhase = false;
       ar.phaseStart = now;
     }
   } else {
-    if (now - ar.phaseStart >= tDelay) {
-      digitalWrite(pin, HIGH);
-      ar.onPhase = true;
-      ar.phaseStart = now;
+    if (tDelay == 0) {
+      // Немедленно переходим к включению
+      if (tOn > 0) {
+        digitalWrite(pin, HIGH);
+        ar.onPhase = true;
+        ar.phaseStart = now;
+      } else {
+        // Если и tOn = 0 — деактивируем канал полностью
+        ar.active = false;
+      }
+    } else if (now - ar.phaseStart >= tDelay) {
+      if (tOn > 0) {
+        digitalWrite(pin, HIGH);
+        ar.onPhase = true;
+        ar.phaseStart = now;
+      } else {
+        ar.active = false;
+      }
     }
   }
 }
@@ -185,10 +204,8 @@ void modes_run(float current, int currMode, bool isGroupA) {
     if (isGroupA) {
       if (ui_start1Pressed()) relays_activateFirst(true);
       if (ui_start2Pressed()) relays_activateSecond(true);
-      // используем ui_updateLEDs для согласованной индикации
       ui_updateLEDs(true, digitalRead(r1_pin), true, digitalRead(r2_pin), 1);
     } else {
-      // Группа B — усиленная блокировка (разомкнутые переходы)
       bool r1On = (digitalRead(r1_pin) == HIGH);
       bool r2On = (digitalRead(r2_pin) == HIGH);
 
@@ -203,7 +220,6 @@ void modes_run(float current, int currMode, bool isGroupA) {
         s_anyRelayActiveInGroupB = true;
       }
 
-      // Индикация (фиксированные LED позиции)
       digitalWrite(LED_ON1_PIN, r1On);
       digitalWrite(LED2_DELAY1_PIN, LOW);
       digitalWrite(LED_ON2_PIN, r2On);
@@ -233,82 +249,139 @@ void modes_run(float current, int currMode, bool isGroupA) {
         app_state_setCurrentCycle(0);
         s_cycleRunning = true;
         s_cycleStartTime = now;
-        relays_activateFirst(true);
-        setSyncState(R1_ON);
+
+        // Запуск: включаем R1 только если время > 0
+        unsigned long r1Time = app_state_getRelay1Time();
+        if (r1Time > 0) {
+          digitalWrite(r1_pin, HIGH);
+          setSyncState(R1_ON);
+        } else {
+          // R1 = 0 → переходим к D1
+          setSyncState(D1);
+        }
         return;
       }
 
       if (s_syncActive && !g_isPaused) {
-        // Включаем паузу
         g_isPaused = true;
         s_pauseStart = now;
         relays_deactivateAll();
         ui_clearLEDs();
         return;
       } else if (g_isPaused) {
-        // Выключаем паузу
         g_isPaused = false;
         // Восстанавливаем состояние
         if (s_sync == R1_ON) {
-          digitalWrite(r1_pin, HIGH);
+          if (app_state_getRelay1Time() > 0) digitalWrite(r1_pin, HIGH);
         } else if (s_sync == R2_ON) {
-          digitalWrite(r2_pin, HIGH);
+          if (app_state_getRelay2Time() > 0) digitalWrite(r2_pin, HIGH);
         }
         s_cycleStartTime += (now - s_pauseStart);
         return;
       }
     }
 
+    if (!s_syncActive) return;
+
     // если активна, обрабатываем состояние синхрона
     switch (s_sync) {
       case R1_ON:
-        if (g_isPaused) return;
-        if ((now - s_syncStart) >= app_state_getRelay1Time()) {
-          digitalWrite(r1_pin, LOW);
-          setSyncState(D1);
+        {
+          if (g_isPaused) return;
+          unsigned long r1Time = app_state_getRelay1Time();
+          if (r1Time == 0) {
+            setSyncState(D1);
+          } else if ((now - s_syncStart) >= r1Time) {
+            digitalWrite(r1_pin, LOW);
+            setSyncState(D1);
+          }
+          break;
         }
-        break;
 
       case D1:
-        if (g_isPaused) return;
-        if ((now - s_syncStart) >= app_state_getDelay1Time()) {
-          digitalWrite(r2_pin, HIGH);
-          setSyncState(R2_ON);
+        {
+          if (g_isPaused) return;
+          unsigned long d1Time = app_state_getDelay1Time();
+          if (d1Time == 0) {
+            // Переход к R2
+            unsigned long r2Time = app_state_getRelay2Time();
+            if (r2Time > 0) {
+              digitalWrite(r2_pin, HIGH);
+            }
+            setSyncState(R2_ON);
+          } else if ((now - s_syncStart) >= d1Time) {
+            unsigned long r2Time = app_state_getRelay2Time();
+            if (r2Time > 0) {
+              digitalWrite(r2_pin, HIGH);
+            }
+            setSyncState(R2_ON);
+          }
+          break;
         }
-        break;
 
       case R2_ON:
-        if (g_isPaused) return;
-        if ((now - s_syncStart) >= app_state_getRelay2Time()) {
-          digitalWrite(r2_pin, LOW);
-          setSyncState(D2);
+        {
+          if (g_isPaused) return;
+          unsigned long r2Time = app_state_getRelay2Time();
+          if (r2Time == 0) {
+            setSyncState(D2);
+          } else if ((now - s_syncStart) >= r2Time) {
+            digitalWrite(r2_pin, LOW);
+            setSyncState(D2);
+          }
+          break;
         }
-        break;
 
       case D2:
-        if (g_isPaused) return;
-        if ((now - s_syncStart) >= app_state_getDelay2Time()) {
-          if (s_cycle <= MAX_CYCLE_COUNT) {
-            s_cycle++;
-            app_state_setCurrentCycle(s_cycle);
-          }
+        {
+          if (g_isPaused) return;
+          unsigned long d2Time = app_state_getDelay2Time();
+          if (d2Time == 0) {
+            // Завершаем шаг цикла
+            if (s_cycle <= MAX_CYCLE_COUNT) {
+              s_cycle++;
+              app_state_setCurrentCycle(s_cycle);
+            }
 
-          if (!app_state_getInfiniteCycles() && s_cycle >= app_state_getCycleLimit()) {
-            setSyncState(FINISHED);
-            s_cycleRunning = false;
-            s_finalElapsedTime = now - s_cycleStartTime;
-            // почистим светодиоды ниже (FINISHED)
-            break;
-          } else {
-            digitalWrite(r1_pin, HIGH);
-            setSyncState(R1_ON);
+            if (!app_state_getInfiniteCycles() && s_cycle >= app_state_getCycleLimit()) {
+              setSyncState(FINISHED);
+              s_cycleRunning = false;
+              s_finalElapsedTime = now - s_cycleStartTime;
+            } else {
+              // Новый цикл
+              unsigned long r1Time = app_state_getRelay1Time();
+              if (r1Time > 0) {
+                digitalWrite(r1_pin, HIGH);
+                setSyncState(R1_ON);
+              } else {
+                setSyncState(D1);
+              }
+            }
+          } else if ((now - s_syncStart) >= d2Time) {
+            if (s_cycle <= MAX_CYCLE_COUNT) {
+              s_cycle++;
+              app_state_setCurrentCycle(s_cycle);
+            }
+
+            if (!app_state_getInfiniteCycles() && s_cycle >= app_state_getCycleLimit()) {
+              setSyncState(FINISHED);
+              s_cycleRunning = false;
+              s_finalElapsedTime = now - s_cycleStartTime;
+            } else {
+              unsigned long r1Time = app_state_getRelay1Time();
+              if (r1Time > 0) {
+                digitalWrite(r1_pin, HIGH);
+                setSyncState(R1_ON);
+              } else {
+                setSyncState(D1);
+              }
+            }
           }
+          break;
         }
-        break;
 
       case FINISHED:
         s_cycleRunning = false;
-        // гасим все LED
         digitalWrite(LED_ON1_PIN, LOW);
         digitalWrite(LED2_DELAY1_PIN, LOW);
         digitalWrite(LED_ON2_PIN, LOW);
@@ -320,10 +393,10 @@ void modes_run(float current, int currMode, bool isGroupA) {
     }
 
     // Индикация по текущему состоянию синхрона
-    digitalWrite(LED_ON1_PIN, s_sync == R1_ON ? HIGH : LOW);
-    digitalWrite(LED2_DELAY1_PIN, s_sync == D1 ? HIGH : LOW);
-    digitalWrite(LED_ON2_PIN, s_sync == R2_ON ? HIGH : LOW);
-    digitalWrite(LED4_DELAY2_PIN, s_sync == D2 ? HIGH : LOW);
+    digitalWrite(LED_ON1_PIN, (s_sync == R1_ON && app_state_getRelay1Time() > 0) ? HIGH : LOW);
+    digitalWrite(LED2_DELAY1_PIN, (s_sync == D1 && app_state_getDelay1Time() > 0) ? HIGH : LOW);
+    digitalWrite(LED_ON2_PIN, (s_sync == R2_ON && app_state_getRelay2Time() > 0) ? HIGH : LOW);
+    digitalWrite(LED4_DELAY2_PIN, (s_sync == D2 && app_state_getDelay2Time() > 0) ? HIGH : LOW);
     return;
   }
 
@@ -334,36 +407,46 @@ void modes_run(float current, int currMode, bool isGroupA) {
 
     unsigned long now = millis();
 
-    // управление по кнопкам — включаем/останавливаем соответствующий автомат
     if (ui_start1Pressed()) {
+      s_a1.active = !s_a1.active;
       if (s_a1.active) {
-        s_a1.active = false;
-        digitalWrite(r1_pin, LOW);
+        unsigned long r1Time = app_state_getRelay1Time();
+        if (r1Time > 0) {
+          s_a1.onPhase = true;
+          s_a1.phaseStart = now;
+          digitalWrite(r1_pin, HIGH);
+        } else {
+          // R1 = 0 → сразу переходим к задержке или выключаем
+          s_a1.onPhase = false;
+          s_a1.phaseStart = now;
+          digitalWrite(r1_pin, LOW);
+        }
       } else {
-        s_a1.active = true;
-        s_a1.onPhase = true;
-        s_a1.phaseStart = now;
-        digitalWrite(r1_pin, HIGH);
+        digitalWrite(r1_pin, LOW);
       }
     }
 
     if (ui_start2Pressed()) {
+      s_a2.active = !s_a2.active;
       if (s_a2.active) {
-        s_a2.active = false;
-        digitalWrite(r2_pin, LOW);
+        unsigned long r2Time = app_state_getRelay2Time();
+        if (r2Time > 0) {
+          s_a2.onPhase = true;
+          s_a2.phaseStart = now;
+          digitalWrite(r2_pin, HIGH);
+        } else {
+          s_a2.onPhase = false;
+          s_a2.phaseStart = now;
+          digitalWrite(r2_pin, LOW);
+        }
       } else {
-        s_a2.active = true;
-        s_a2.onPhase = true;
-        s_a2.phaseStart = now;
-        digitalWrite(r2_pin, HIGH);
+        digitalWrite(r2_pin, LOW);
       }
     }
 
-    // обработка циклов для каждого асинхронного автомата (с минимальным дублированием)
     handleAsyncRelay(s_a1, r1_pin, app_state_getRelay1Time(), app_state_getDelay1Time(), now);
     handleAsyncRelay(s_a2, r2_pin, app_state_getRelay2Time(), app_state_getDelay2Time(), now);
 
-    // индикаторы: используем ui_updateLEDs для консистентности
     ui_updateLEDs(
       s_a1.active, (digitalRead(r1_pin) == HIGH),
       s_a2.active, (digitalRead(r2_pin) == HIGH),
@@ -393,11 +476,16 @@ void modes_run(float current, int currMode, bool isGroupA) {
 
       // Управление тормозом
       if (!s_brakeActive) {
-        if (ui_start1Pressed() || ui_start2Pressed()) {
+        if (ui_start1Pressed()) {
           s_brakeActive = true;
           s_brakeBlinkSlow = true;
           s_brakeBlinkTime = millis();
-          digitalWrite(RELAY1_24V_PIN, HIGH);  // Растормозить
+          digitalWrite(RELAY1_24V_PIN, HIGH);  // Растормозить канал 1
+        } else if (ui_start2Pressed()) {
+          s_brakeActive = true;
+          s_brakeBlinkSlow = true;
+          s_brakeBlinkTime = millis();
+          digitalWrite(RELAY2_24V_PIN, HIGH);  // Растормозить канал 2
         }
       } else if (s_brakeBlinkSlow || s_brakeBlinkFast) {
         if (current >= MIN_CURRENT_BRAKE) {
@@ -425,14 +513,19 @@ void modes_run(float current, int currMode, bool isGroupA) {
 
     if (s_brakeBlinkSlow || s_brakeBlinkFast) {
       uint8_t interval = s_brakeBlinkSlow ? BRAKE_SLOW_INTERVAL : BRAKE_FAST_INTERVAL;
-
       if (millis() - s_brakeBlinkTime >= interval) {
-        digitalWrite(LED_ON1_PIN, !digitalRead(LED_ON1_PIN));
+        // Мигаем соответствующим светодиодом
+        if (s_brakeActive && ui_start1Pressed()) {
+          digitalWrite(LED_ON1_PIN, !digitalRead(LED_ON1_PIN));
+        } else if (s_brakeActive && ui_start2Pressed()) {
+          digitalWrite(LED_ON2_PIN, !digitalRead(LED_ON2_PIN));
+        }
         s_brakeBlinkTime = millis();
       }
     } else {
       if (s_brakeBlinkTime != 0) {
         digitalWrite(LED_ON1_PIN, LOW);
+        digitalWrite(LED_ON2_PIN, LOW);
         s_brakeBlinkSlow = false;
         s_brakeBlinkFast = false;
         s_brakeBlinkTime = 0;
@@ -440,7 +533,8 @@ void modes_run(float current, int currMode, bool isGroupA) {
 
       if (s_relay1Locked) {
         digitalWrite(LED_ON1_PIN, digitalRead(r1_pin));
-      } else if (s_relay2Locked) {
+      }
+      if (s_relay2Locked) {
         digitalWrite(LED_ON2_PIN, digitalRead(r2_pin));
       }
     }
@@ -448,10 +542,8 @@ void modes_run(float current, int currMode, bool isGroupA) {
     // Контроль тока
     if (!s_brakeError && (s_relay1Locked || s_relay2Locked)) {
       float current = current_readDC();
-
       if (current < MIN_CURRENT_BRAKE) {
         s_brakeError = true;
-
         relays_deactivateAll();
         ui_clearLEDs();
       }
@@ -462,10 +554,8 @@ void modes_run(float current, int currMode, bool isGroupA) {
 unsigned long modes_getCycleElapsedTime() {
   if (s_cycleRunning && !current_isOverload()) {
     if (g_isPaused) {
-      // Возвращаем время до паузы
       return s_pauseStart - s_cycleStartTime;
     } else {
-      // Возвращаем реальное время минус время пауз
       return millis() - s_cycleStartTime;
     }
   }
