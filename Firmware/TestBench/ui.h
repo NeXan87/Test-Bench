@@ -4,10 +4,6 @@
 #include <Arduino.h>
 #include <Bounce2.h>
 
-extern Bounce g_btn1;
-extern Bounce g_btn2;
-extern Bounce g_btnStop;
-
 void ui_init();
 void ui_runStartupAnimation();
 void ui_updateButtons();
