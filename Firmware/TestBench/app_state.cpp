@@ -94,8 +94,12 @@ void app_state_update() {
   }
 
   // 4️⃣ Применяем ограничения и режимы
+  if (raw_relay2 < 1000 && raw_delay1 < 1000) {
+    raw_delay1 = 1000;
+  }
+
   s_relay1 = raw_relay1;
-  s_delay1 = raw_relay2 < 1000 ? 1000 : raw_delay1;
+  s_delay1 = raw_delay1;
 
   if (s_mode == MODE_SYNC_AUTO) {
     s_relay2 = raw_relay2 < 1000 ? 0 : raw_relay2;
