@@ -16,7 +16,7 @@ enum SyncState { IDLE,
 // состояние машины
 SyncState s_sync = IDLE;
 unsigned long s_syncStart = 0;
-int s_cycle = 0;
+uint16_t s_cycle = 0;
 bool s_syncActive = false;
 
 // вспомогательные состояния
