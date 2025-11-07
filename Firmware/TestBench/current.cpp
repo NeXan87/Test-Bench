@@ -1,5 +1,7 @@
 #include "current.h"
 #include "config.h"
+#include "relays.h"
+#include "ui.h"
 #include <ACS712.h>  // Библиотека RobTillaart
 
 ACS712 sensor(CURRENT_SENSOR_PIN, VOLTAGE_ACS712, 1024, M_VPER_AMPERE);
