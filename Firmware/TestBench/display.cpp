@@ -137,7 +137,9 @@ void display_update(Mode mode, bool groupA, float current) {
   // ---- Cycle Time ----
   if (cycleTime != prev_cycleTime) {
     lcd.setCursor(2, 3);
-    lcd.print(utils_formatCycleTime(cycleTime));
+    char cycleTimeStr[9];
+    utils_formatCycleTime(cycleTime, cycleTimeStr, sizeof(cycleTimeStr));
+    lcd.print(cycleTimeStr);
     prev_cycleTime = cycleTime;
   }
 
