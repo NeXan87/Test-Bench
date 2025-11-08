@@ -14,7 +14,6 @@ bool g_isDiagnosticMode = false;
 }
 
 void setup() {
-  // Инициализация кнопок ДО всего остального
   pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
 
   // Проверка диагностики: удерживается ли Пуск2?
@@ -27,32 +26,25 @@ void setup() {
   relays_init();
   app_state_init();
   modes_init();
-  display_init();
-
-  if (g_isDiagnosticMode) {
-    
-    while (digitalRead(START2_BUTTON_PIN) == LOW) {
-      delay(10);  // ждём отпускания
-    }
-  } else {
-    ui_runStartupAnimation();
-    delay(STARTUP_TIMEOUT);
-  }
-
+  display_init(g_isDiagnosticMode);
+  ui_runStartupAnimation();
+  delay(STARTUP_TIMEOUT);
   ui_clearLEDs();
   display_clear();
 }
 
 void loop() {
+  static unsigned long lastDisplayTime = 0;
+  static unsigned long lastPotTime = 0;
+  static unsigned long lastCurrentTime = 0;
+
   if (g_isDiagnosticMode) {
-    display_showDiagnostic();
-    delay(200);  // обновление 5 раз/сек
+    if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
+      display_showDiagnostic();
+      lastDisplayTime = millis();
+    }
     return;
   }
-
-  static unsigned long lastPotTime = 0;
-  static unsigned long lastDisplayTime = 0;
-  static unsigned long lastCurrentTime = 0;
 
   if (modes_isReady()) {
     currMode = app_state_getMode();
