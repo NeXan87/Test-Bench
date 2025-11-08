@@ -22,6 +22,7 @@ bool s_syncActive = false;
 // вспомогательные состояния
 bool s_relay1Locked = false;
 bool s_relay2Locked = false;
+bool s_brakeChannel1 = false;  // true = канал 1 (Пуск1), false = канал 2 (Пуск2)
 bool s_anyRelayActiveInGroupB = false;
 
 unsigned long s_cycleStartTime = 0;
@@ -65,6 +66,7 @@ void resetBrakeActive() {
   s_brakeBlinkSlow = false;
   s_brakeBlinkFast = false;
   s_brakeError = false;
+  s_brakeChannel1 = false;
   s_brakeBlinkTime = 0;
 }
 
@@ -479,20 +481,19 @@ void modes_run(float current, int currMode, bool isGroupA) {
         if (ui_start1Pressed()) {
           s_brakeActive = true;
           s_brakeBlinkSlow = true;
-          s_brakeBlinkTime = millis();
-          digitalWrite(RELAY1_24V_PIN, HIGH);  // Растормозить канал 1
+          s_brakeChannel1 = true;  // ← ЗАПОМНИЛИ КАНАЛ 1
+          digitalWrite(RELAY1_24V_PIN, HIGH);
         } else if (ui_start2Pressed()) {
           s_brakeActive = true;
           s_brakeBlinkSlow = true;
-          s_brakeBlinkTime = millis();
-          digitalWrite(RELAY2_24V_PIN, HIGH);  // Растормозить канал 2
+          s_brakeChannel1 = false;  // ← ЗАПОМНИЛИ КАНАЛ 2
+          digitalWrite(RELAY2_24V_PIN, HIGH);
         }
       } else if (s_brakeBlinkSlow || s_brakeBlinkFast) {
         if (current >= MIN_CURRENT_BRAKE) {
           if (s_brakeBlinkSlow) {
             s_brakeBlinkSlow = false;
             s_brakeBlinkFast = true;
-            s_brakeBlinkTime = millis();  // ← СБРОС ТАЙМЕРА ПРИ ПЕРЕХОДЕ
           }
 
           if (!s_relay1Locked && ui_start1Pressed() && !r1On && !r2On) {
@@ -511,7 +512,6 @@ void modes_run(float current, int currMode, bool isGroupA) {
           if (s_brakeBlinkFast) {
             s_brakeBlinkFast = false;
             s_brakeBlinkSlow = true;
-            s_brakeBlinkTime = millis();  // ← СБРОС ТАЙМЕРА ПРИ ПЕРЕХОДЕ
           }
         }
       }
@@ -520,10 +520,9 @@ void modes_run(float current, int currMode, bool isGroupA) {
     if (s_brakeBlinkSlow || s_brakeBlinkFast) {
       uint8_t interval = s_brakeBlinkSlow ? BRAKE_SLOW_INTERVAL : BRAKE_FAST_INTERVAL;
       if (millis() - s_brakeBlinkTime >= interval) {
-        // Мигаем соответствующим светодиодом
-        if (s_brakeActive && ui_start1Pressed()) {
+        if (s_brakeChannel1) {
           digitalWrite(LED_ON1_PIN, !digitalRead(LED_ON1_PIN));
-        } else if (s_brakeActive && ui_start2Pressed()) {
+        } else {
           digitalWrite(LED_ON2_PIN, !digitalRead(LED_ON2_PIN));
         }
         s_brakeBlinkTime = millis();
@@ -547,7 +546,6 @@ void modes_run(float current, int currMode, bool isGroupA) {
 
     // Контроль тока
     if (!s_brakeError && (s_relay1Locked || s_relay2Locked)) {
-      float current = current_readDC();
       if (current < MIN_CURRENT_BRAKE) {
         s_brakeError = true;
         relays_deactivateAll();
