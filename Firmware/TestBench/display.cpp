@@ -20,8 +20,74 @@ void display_init() {
   lcd.print("FW: git.new/H3iooZv");
 }
 
+void display_diagnosctic_init() {
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("DIAGNOSTIC MODE");
+  lcd.setCursor(0, 1);
+  lcd.print("Release START2");
+  lcd.setCursor(0, 2);
+  lcd.print("to continue...");
+}
+
 void display_clear() {
   lcd.clear();
+}
+
+void display_showDiagnostic() {
+  lcd.clear();
+
+  // Считываем состояния
+  uint8_t d0 = digitalRead(0);
+  uint8_t d1 = digitalRead(1);
+  uint8_t d6 = digitalRead(6);
+  uint8_t d7 = digitalRead(7);
+  uint8_t d8 = digitalRead(8);
+  uint8_t d9 = digitalRead(9);
+
+  int a0 = analogRead(A0);
+  int a1 = analogRead(A1);
+  int a2 = analogRead(A2);
+  int a3 = analogRead(A3);
+  int a6 = analogRead(A6);
+  int a7 = analogRead(A7);
+
+  // Строка 0: D0, D8, A2
+  lcd.setCursor(0, 0);
+  lcd.print("D0=");
+  lcd.print(d0);
+  lcd.print(" D8=");
+  lcd.print(d8);
+  lcd.print(" A2=");
+  lcd.print(a2);
+
+  // Строка 1: D1, D9, A3
+  lcd.setCursor(0, 1);
+  lcd.print("D1=");
+  lcd.print(d1);
+  lcd.print(" D9=");
+  lcd.print(d9);
+  lcd.print(" A3=");
+  lcd.print(a3);
+
+  // Строка 2: D6, A0, A6
+  lcd.setCursor(0, 2);
+  lcd.print("D6=");
+  lcd.print(d6);
+  lcd.print(" A0=");
+  lcd.print(a0);
+  lcd.print(" A6=");
+  lcd.print(a6);
+
+  // Строка 3: D7, A1, A7
+  lcd.setCursor(0, 3);
+  lcd.print("D7=");
+  lcd.print(d7);
+  lcd.print(" A1=");
+  lcd.print(a1);
+  lcd.print(" A7=");
+  lcd.print(a7);
 }
 
 void display_update(Mode mode, bool groupA, float current) {
