@@ -518,8 +518,7 @@ void modes_run(float current, int currMode, bool isGroupA) {
     }
 
     if (s_brakeBlinkSlow || s_brakeBlinkFast) {
-      uint8_t interval = s_brakeBlinkSlow ? BRAKE_SLOW_INTERVAL : BRAKE_FAST_INTERVAL;
-      if (millis() - s_brakeBlinkTime >= interval) {
+      if (millis() - s_brakeBlinkTime >= BRAKE_LED_INTERVAL) {
         if (s_brakeChannel1) {
           digitalWrite(LED_ON1_PIN, !digitalRead(LED_ON1_PIN));
         } else {
