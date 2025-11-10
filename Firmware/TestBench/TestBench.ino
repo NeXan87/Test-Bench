@@ -5,6 +5,7 @@
 #include "modes.h"
 #include "display.h"
 #include "current.h"
+#include "calibration.h"
 
 namespace {
 float current = 0.0f;
@@ -27,6 +28,7 @@ void setup() {
   ui_runStartupAnimation();
   current_setMidPoint();
   delay(STARTUP_TIMEOUT);
+  calibration_load();
   ui_clearLEDs();
   display_clear();
 }
@@ -37,8 +39,13 @@ void loop() {
   static unsigned long lastCurrentTime = 0;
 
   if (g_isCalibrateMode || g_isDiagnosticMode) {
+    if (g_isCalibrateMode) {
+      ui_updateButtons();
+      if (ui_StopPressed()) calibration_save();
+    }
+
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
-      if (g_isCalibrateMode) display_showCalibrate();
+      if (g_isCalibrateMode) calibration_run();
       if (g_isDiagnosticMode) display_showDiagnostic();
       lastDisplayTime = millis();
     }

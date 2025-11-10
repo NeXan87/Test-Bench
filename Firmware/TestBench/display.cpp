@@ -1,61 +1,11 @@
-#include "app_state.h"
+
 #include "display.h"
 #include "config.h"
 #include "utils.h"
 #include "ui.h"
-#include "app_state.h"
 #include "modes.h"
-#include <Wire.h>
-#include <EEPROM.h>
-#include <LiquidCrystal_I2C.h>
 
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLS, LCD_ROWS);
-
-namespace {
-int16_t s_calMin[5] = { 0 };
-}
-
-int16_t readCalMin(uint8_t addr) {
-  uint16_t val = EEPROM.read(addr) | (EEPROM.read(addr + 1) << 8);
-  if (val == 0xFFFF) return 0;
-  return (int16_t)val;
-}
-
-void writeCalMin(uint8_t addr, int16_t value) {
-  EEPROM.write(addr, value & 0xFF);
-  EEPROM.write(addr + 1, (value >> 8) & 0xFF);
-}
-
-// Обновление кэша из EEPROM
-void loadCalibration() {
-  s_calMin[0] = readCalMin(ADDR_ON1_MIN);
-  s_calMin[1] = readCalMin(ADDR_D1_MIN);
-  s_calMin[2] = readCalMin(ADDR_ON2_MIN);
-  s_calMin[3] = readCalMin(ADDR_D2_MIN);
-  s_calMin[4] = readCalMin(ADDR_CYCLES_MIN);
-
-  // Если первый запуск (все 0xFFFF), инициализируем нулями
-  if (s_calMin[0] == 0xFFFF) {
-    for (int i = 0; i < 5; i++) {
-      s_calMin[i] = 0;
-    }
-  }
-}
-
-int getCalibratedPercent(int raw, uint16_t minVal) {
-  if (minVal > 1023) minVal = 1023;
-  int corrected = raw - static_cast<int>(minVal);
-  if (corrected < 0) corrected = 0;
-  int range = 1023 - static_cast<int>(minVal);
-  if (range <= 0) return 0;
-
-  // Используем long для избежания переполнения
-  long percent = (static_cast<long>(corrected) * 100L) / range;
-  if (percent > 100) percent = 100;
-  if (percent < 0) percent = 0;
-  return static_cast<int>(percent);
-}
-
 
 void display_init(bool isDiagnosticMode, bool g_isCalibrateMode) {
   lcd.init();
@@ -76,15 +26,6 @@ void display_init(bool isDiagnosticMode, bool g_isCalibrateMode) {
 
 void display_clear() {
   lcd.clear();
-}
-
-void setChars(uint8_t row, uint8_t col, int value, bool isClean = false) {
-  lcd.setCursor(row, col);
-  if (isClean) {
-    lcd.print(F("    "));
-    lcd.setCursor(row, col);
-  }
-  lcd.print(value);
 }
 
 void display_showDiagnostic() {
@@ -122,142 +63,58 @@ void display_showDiagnostic() {
 
   // Строка 0: D0, D8, A2
   if (prev_d0 != d0) {
-    setChars(3, 0, d0);
+    utils_setChars(3, 0, d0);
     prev_d0 = d0;
   }
   if (prev_d8 != d8) {
-    setChars(8, 0, d8);
+    utils_setChars(8, 0, d8);
     prev_d8 = d8;
   }
   if (prev_a2 != a2) {
-    setChars(16, 0, a2, true);
+    utils_setChars(16, 0, a2, true);
     prev_a2 = a2;
   }
 
   // Строка 1: D1, D9, A3
   if (prev_d1 != d1) {
-    setChars(3, 1, d1);
+    utils_setChars(3, 1, d1);
     prev_d1 = d1;
   }
   if (prev_d9 != d9) {
-    setChars(8, 1, d9);
+    utils_setChars(8, 1, d9);
     prev_d9 = d9;
   }
   if (prev_a3 != a3) {
-    setChars(16, 1, a3, true);
+    utils_setChars(16, 1, a3, true);
     prev_a3 = a3;
   }
 
   // Строка 2: D6, A0, A6
   if (prev_d6 != d6) {
-    setChars(3, 2, d6);
+    utils_setChars(3, 2, d6);
     prev_d6 = d6;
   }
   if (prev_a0 != a0) {
-    setChars(8, 2, a0, true);
+    utils_setChars(8, 2, a0, true);
     prev_a0 = a0;
   }
   if (prev_a6 != a6) {
-    setChars(16, 2, a6, true);
+    utils_setChars(16, 2, a6, true);
     prev_a6 = a6;
   }
 
   // Строка 3: D7, A1, A7
   if (prev_d7 != d7) {
-    setChars(3, 3, d7);
+    utils_setChars(3, 3, d7);
     prev_d7 = d7;
   }
   if (prev_a1 != a1) {
-    setChars(8, 3, a1, true);
+    utils_setChars(8, 3, a1, true);
     prev_a1 = a1;
   }
   if (prev_a7 != a7) {
-    setChars(16, 3, a7, true);
+    utils_setChars(16, 3, a7, true);
     prev_a7 = a7;
-  }
-}
-
-void display_showCalibrate() {
-  static bool layoutDrawn = false;
-  static int prev_pOn1 = -1, prev_pD1 = -1, prev_pOn2 = -1, prev_pD2 = -1, prev_pCyc = -1;
-
-  int rawOn1 = analogRead(POT_ON1_PIN);
-  int rawD1 = analogRead(POT_DELAY1_PIN);
-  int rawOn2 = analogRead(POT_ON2_PIN);
-  int rawD2 = analogRead(POT_DELAY2_PIN);
-  int rawCyc = analogRead(POT_CYCLES_PIN);
-
-  int pOn1 = getCalibratedPercent(analogRead(POT_ON1_PIN), s_calMin[0]);
-  int pD1 = getCalibratedPercent(analogRead(POT_DELAY1_PIN), s_calMin[1]);
-  int pOn2 = getCalibratedPercent(analogRead(POT_ON2_PIN), s_calMin[2]);
-  int pD2 = getCalibratedPercent(analogRead(POT_DELAY2_PIN), s_calMin[3]);
-  int pCyc = getCalibratedPercent(analogRead(POT_CYCLES_PIN), s_calMin[4]);
-
-  ui_updateButtons();
-
-  if (!layoutDrawn) {
-    loadCalibration();
-
-    lcd.setCursor(0, 0);
-    lcd.print(F("R1:    D1:"));
-    lcd.setCursor(0, 1);
-    lcd.print(F("R2:    D2:    C:"));
-
-    lcd.setCursor(0, 2);
-    lcd.print("Turn all pots LEFT");
-    lcd.setCursor(0, 3);
-    lcd.print("Press STOP when done");
-
-    layoutDrawn = true;
-  }
-
-  // Строка 0: R1, D1
-  if (prev_pOn1 != pOn1) {
-    setChars(3, 0, pOn1, true);
-    prev_pOn1 = pOn1;
-  }
-  if (prev_pD1 != pD1) {
-    setChars(10, 0, pD1, true);
-    prev_pD1 = pD1;
-  }
-
-  // Строка 1: R2, D2, C
-  if (prev_pOn2 != pOn2) {
-    setChars(3, 1, pOn2, true);
-    prev_pOn2 = pOn2;
-  }
-  if (prev_pD2 != pD2) {
-    setChars(10, 1, pD2, true);
-    prev_pD2 = pD2;
-  }
-  if (prev_pCyc != pCyc) {
-    setChars(16, 1, pCyc, true);
-    prev_pCyc = pCyc;
-  }
-
-  if (ui_StopPressed()) {
-    // Сохраняем ТЕКУЩИЕ сырые значения как новые минимумы
-    s_calMin[0] = rawOn1;
-    s_calMin[1] = rawD1;
-    s_calMin[2] = rawOn2;
-    s_calMin[3] = rawD2;
-    s_calMin[4] = rawCyc;
-
-    writeCalMin(ADDR_ON1_MIN, s_calMin[0]);
-    writeCalMin(ADDR_D1_MIN, s_calMin[1]);
-    writeCalMin(ADDR_ON2_MIN, s_calMin[2]);
-    writeCalMin(ADDR_D2_MIN, s_calMin[3]);
-    writeCalMin(ADDR_CYCLES_MIN, s_calMin[4]);
-
-    // Подтверждение
-    lcd.clear();
-    lcd.setCursor(0, 1);
-    lcd.print("Calibration SAVED");
-    lcd.setCursor(0, 2);
-    lcd.print(" Restarting... ");
-    delay(1500);
-
-    layoutDrawn = false;
   }
 }
 

@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "config.h"
+#include "display.h"
 
 const char* utils_formatTimeSec(unsigned long ms) {
   static char buffer[4];     // "000"
@@ -30,4 +31,13 @@ const char* utils_formatCycleTime(unsigned long elapsedMs, char* buffer, size_t 
   buffer[8] = '\0';
 
   return buffer;
+}
+
+void utils_setChars(uint8_t row, uint8_t col, int value, bool isClean = false) {
+  lcd.setCursor(row, col);
+  if (isClean) {
+    lcd.print(F("    "));
+    lcd.setCursor(row, col);
+  }
+  lcd.print(value);
 }
