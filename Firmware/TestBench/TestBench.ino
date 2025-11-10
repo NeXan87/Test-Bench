@@ -21,8 +21,11 @@ void setup() {
   app_state_init();
   modes_init();
 
-  if (ui_start1Held()) g_isCalibrateMode = true;
-  if (ui_start2Held()) g_isDiagnosticMode = true;
+  if (ui_isStart1Held()) {
+    g_isCalibrateMode = true;
+  } else if (ui_isStart2Held()) {
+    g_isDiagnosticMode = true;
+  }
 
   display_init(g_isDiagnosticMode, g_isCalibrateMode);
   ui_runStartupAnimation();
