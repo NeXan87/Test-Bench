@@ -5,7 +5,9 @@
 
 namespace {
 int16_t s_calMin[5] = { 0 };
+unsigned long startTime = 0;
 bool layoutDrawn = false;
+bool isLeftCalibrated = false;
 int prev_pOn1 = -1, prev_pD1 = -1, prev_pOn2 = -1, prev_pD2 = -1, prev_pCyc = -1;
 }
 
@@ -64,11 +66,19 @@ void calibration_run() {
     lcd.print(F("R2:    D2:    C:"));
 
     lcd.setCursor(0, 2);
-    lcd.print("Turn all pots LEFT");
+    lcd.print(F("Turn all pots LEFT"));
     lcd.setCursor(0, 3);
-    lcd.print("Press STOP when done");
+    lcd.print(F("Press STOP when done"));
 
     layoutDrawn = true;
+  }
+
+  if (isLeftCalibrated && millis() - startTime >= 1500) {
+    lcd.setCursor(0, 2);
+    lcd.print(F("Turn all pots RIGHT"));
+    lcd.setCursor(0, 3);
+    lcd.print(F("Press STOP when done"));
+    isLeftCalibrated = false;
   }
 
   // Строка 0: R1, D1
@@ -111,13 +121,9 @@ void calibration_save() {
   writeCalMin(ADDR_CYCLES_MIN, s_calMin[4]);
 
   // Подтверждение
-  lcd.clear();
-  lcd.setCursor(0, 1);
-  lcd.print("Calibration SAVED");
-  lcd.setCursor(0, 2);
-  lcd.print(" Restarting... ");
-  delay(1500);
-
+  lcd.setCursor(0, 3);
+  lcd.print(F("Calibration SAVED"));
+  isLeftCalibrated = true;
   layoutDrawn = false;
   prev_pOn1 = -1;
   prev_pD1 = -1;
