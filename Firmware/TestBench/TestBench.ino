@@ -6,11 +6,9 @@
 #include "display.h"
 #include "current.h"
 #include "calibration.h"
+#include "diagnostic.h"
 
 namespace {
-float current = 0.0f;
-Mode currMode = MODE_MANUAL_BLOCKING;
-bool isGroupA = true;
 bool g_isDiagnosticMode = false;
 bool g_isCalibrateMode = false;
 }
@@ -40,6 +38,9 @@ void loop() {
   static unsigned long lastDisplayTime = 0;
   static unsigned long lastPotTime = 0;
   static unsigned long lastCurrentTime = 0;
+  static Mode currMode = MODE_MANUAL_BLOCKING;
+  static float current = 0.0f;
+  static bool isGroupA = true;
 
   if (g_isCalibrateMode || g_isDiagnosticMode) {
     if (g_isCalibrateMode) {
@@ -49,7 +50,7 @@ void loop() {
 
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
       if (g_isCalibrateMode) calibration_run();
-      if (g_isDiagnosticMode) display_showDiagnostic();
+      if (g_isDiagnosticMode) diagnostic_run();
       lastDisplayTime = millis();
     }
     return;
