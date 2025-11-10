@@ -4,12 +4,16 @@
 #include "ui.h"
 #include <ACS712.h>  // Библиотека RobTillaart
 
-ACS712 sensor(CURRENT_SENSOR_PIN, VOLTAGE_ACS712, 1024, M_VPER_AMPERE);
+ACS712 sensor(CURRENT_SENSOR_PIN, VOLTAGE_ACS712, 1023, M_VPER_AMPERE);
 
 namespace {
 bool s_overloadDetected = false;
 unsigned long s_overloadStartTime = 0;
 bool g_isOverload = false;
+}
+
+void current_setMidPoint() {
+  sensor.setMidPoint(512);
 }
 
 float current_readDC() {

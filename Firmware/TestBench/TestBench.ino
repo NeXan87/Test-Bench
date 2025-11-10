@@ -14,7 +14,6 @@ bool g_isDiagnosticMode = false;
 }
 
 void setup() {
-  pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
   ui_init();
   relays_init();
   app_state_init();
@@ -24,6 +23,7 @@ void setup() {
 
   display_init(g_isDiagnosticMode);
   ui_runStartupAnimation();
+  current_setMidPoint();
   delay(STARTUP_TIMEOUT);
   ui_clearLEDs();
   display_clear();
