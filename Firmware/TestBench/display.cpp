@@ -6,13 +6,13 @@
 
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLS, LCD_ROWS);
 
-void display_init(bool isDiagnosticMode, bool g_isCalibrateMode) {
+void display_init(bool g_isDiagnosticMode, bool g_isCalibrateMode) {
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print(F("TestBench v1.0"));
   lcd.setCursor(0, 1);
-  if (isDiagnosticMode) {
+  if (g_isDiagnosticMode) {
     lcd.print(F("DIAGNOSTIC MODE"));
   } else if (g_isCalibrateMode) {
     lcd.print(F("CALIBRATE MODE"));
