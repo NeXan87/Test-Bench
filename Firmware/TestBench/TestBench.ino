@@ -11,6 +11,7 @@ float current = 0.0f;
 Mode currMode = MODE_MANUAL_BLOCKING;
 bool isGroupA = true;
 bool g_isDiagnosticMode = false;
+bool g_isCalibrateMode = false;
 }
 
 void setup() {
@@ -19,9 +20,10 @@ void setup() {
   app_state_init();
   modes_init();
 
+  if (ui_start1Held()) g_isCalibrateMode = true;
   if (ui_start2Held()) g_isDiagnosticMode = true;
 
-  display_init(g_isDiagnosticMode);
+  display_init(g_isDiagnosticMode, g_isCalibrateMode);
   ui_runStartupAnimation();
   current_setMidPoint();
   delay(STARTUP_TIMEOUT);
@@ -34,9 +36,10 @@ void loop() {
   static unsigned long lastPotTime = 0;
   static unsigned long lastCurrentTime = 0;
 
-  if (g_isDiagnosticMode) {
+  if (g_isCalibrateMode || g_isDiagnosticMode) {
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
-      display_showDiagnostic();
+      if (g_isCalibrateMode) display_showCalibrate();
+      if (g_isDiagnosticMode) display_showDiagnostic();
       lastDisplayTime = millis();
     }
     return;

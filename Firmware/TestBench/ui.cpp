@@ -60,6 +60,12 @@ bool ui_start1Pressed() {
 bool ui_start2Pressed() {
   return g_btn2.fell();
 }
+bool ui_StopPressed() {
+  return g_btnStop.fell();
+}
+bool ui_start1Held() {
+  return !g_btn1.read();
+}
 bool ui_start2Held() {
   return !g_btn2.read();
 }

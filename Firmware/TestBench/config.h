@@ -31,6 +31,13 @@
 #define POT_DELAY2_PIN A1  // Задержка после реле 2/4
 #define POT_CYCLES_PIN A0  // Количество циклов
 
+// Адреса минимальных значений потенциометров в EEPROM (10 байт: 5 * uint16_t)
+#define ADDR_ON1_MIN 0
+#define ADDR_D1_MIN 2
+#define ADDR_ON2_MIN 4
+#define ADDR_D2_MIN 6
+#define ADDR_CYCLES_MIN 8
+
 // Датчик тока
 #define CURRENT_SENSOR_PIN A7  // Датчик постоянного тока
 
