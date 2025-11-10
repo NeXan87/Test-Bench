@@ -28,6 +28,15 @@ void display_clear() {
   lcd.clear();
 }
 
+void setChars(uint8_t row, uint8_t col, int value, bool isAnalogPin = false) {
+  lcd.setCursor(row, col);
+  if (isAnalogPin) {
+    lcd.print(F("    "));
+    lcd.setCursor(row, col);
+  }
+  lcd.print(value);
+}
+
 void display_showDiagnostic() {
   static bool layoutDrawn = false;
   static int prev_d0 = -1, prev_d1 = -1, prev_d6 = -1, prev_d7 = -1, prev_d8 = -1, prev_d9 = -1;
@@ -63,81 +72,57 @@ void display_showDiagnostic() {
 
   // Строка 0: D0, D8, A2
   if (prev_d0 != d0) {
-    lcd.setCursor(3, 0);
-    lcd.print(d0);
+    setChars(3, 0, d0);
     prev_d0 = d0;
   }
   if (prev_d8 != d8) {
-    lcd.setCursor(8, 0);
-    lcd.print(d8);
+    setChars(8, 0, d8);
     prev_d8 = d8;
   }
   if (prev_a2 != a2) {
-    lcd.setCursor(16, 0);
-    lcd.print(F("    "));
-    lcd.setCursor(16, 0);
-    lcd.print(a2);
+    setChars(16, 0, a2, true);
     prev_a2 = a2;
   }
 
   // Строка 1: D1, D9, A3
   if (prev_d1 != d1) {
-    lcd.setCursor(3, 1);
-    lcd.print(d1);
+    setChars(3, 1, d1);
     prev_d1 = d1;
   }
   if (prev_d9 != d9) {
-    lcd.setCursor(8, 1);
-    lcd.print(d9);
+    setChars(8, 1, d9);
     prev_d9 = d9;
   }
   if (prev_a3 != a3) {
-    lcd.setCursor(16, 1);
-    lcd.print(F("    "));
-    lcd.setCursor(16, 1);
-    lcd.print(a3);
+    setChars(16, 1, a3, true);
     prev_a3 = a3;
   }
 
   // Строка 2: D6, A0, A6
   if (prev_d6 != d6) {
-    lcd.setCursor(3, 2);
-    lcd.print(d6);
+    setChars(3, 2, d6);
     prev_d6 = d6;
   }
   if (prev_a0 != a0) {
-    lcd.setCursor(8, 2);
-    lcd.print(F("    "));
-    lcd.setCursor(8, 2);
-    lcd.print(a0);
+    setChars(8, 2, a0, true);
     prev_a0 = a0;
   }
   if (prev_a6 != a6) {
-    lcd.setCursor(16, 2);
-    lcd.print(F("    "));
-    lcd.setCursor(16, 2);
-    lcd.print(a6);
+    setChars(16, 2, a6, true);
     prev_a6 = a6;
   }
 
   // Строка 3: D7, A1, A7
   if (prev_d7 != d7) {
-    lcd.setCursor(3, 3);
-    lcd.print(d7);
+    setChars(3, 3, d7);
     prev_d7 = d7;
   }
   if (prev_a1 != a1) {
-    lcd.setCursor(8, 3);
-    lcd.print(F("    "));
-    lcd.setCursor(8, 3);
-    lcd.print(a1);
+    setChars(8, 3, a1, true);
     prev_a1 = a1;
   }
   if (prev_a7 != a7) {
-    lcd.setCursor(16, 3);
-    lcd.print(F("    "));
-    lcd.setCursor(16, 3);
-    lcd.print(a7);
+    setChars(16, 3, a7, true);
     prev_a7 = a7;
   }
 }
