@@ -30,8 +30,8 @@ void display_clear() {
 
 void display_showDiagnostic() {
   static bool layoutDrawn = false;
-  static uint16_t prev_d0 = 0, prev_d1 = 0, prev_d6 = 0, prev_d7 = 0, prev_d8 = 0, prev_d9 = 0;
-  static uint16_t prev_a0 = 0, prev_a1 = 0, prev_a2 = 0, prev_a3 = 0, prev_a6 = 0, prev_a7 = 0;
+  static int prev_d0 = -1, prev_d1 = -1, prev_d6 = -1, prev_d7 = -1, prev_d8 = -1, prev_d9 = -1;
+  static int prev_a0 = -1, prev_a1 = -1, prev_a2 = -1, prev_a3 = -1, prev_a6 = -1, prev_a7 = -1;
 
   if (!layoutDrawn) {
     lcd.setCursor(0, 0);

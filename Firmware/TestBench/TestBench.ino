@@ -15,17 +15,13 @@ bool g_isDiagnosticMode = false;
 
 void setup() {
   pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
-
-  // Проверка диагностики: удерживается ли Пуск2?
-  delay(50);  // дать стабилизироваться
-  if (digitalRead(START2_BUTTON_PIN) == LOW) {
-    g_isDiagnosticMode = true;
-  }
-
   ui_init();
   relays_init();
   app_state_init();
   modes_init();
+
+  if (ui_start2Held()) g_isDiagnosticMode = true;
+
   display_init(g_isDiagnosticMode);
   ui_runStartupAnimation();
   delay(STARTUP_TIMEOUT);
