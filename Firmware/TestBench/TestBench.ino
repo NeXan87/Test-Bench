@@ -5,30 +5,31 @@
 #include "modes.h"
 #include "display.h"
 #include "current.h"
+#include "calibration.h"
+#include "diagnostic.h"
 
 namespace {
-float current = 0.0f;
-Mode currMode = MODE_MANUAL_BLOCKING;
-bool isGroupA = true;
 bool g_isDiagnosticMode = false;
+bool g_isCalibrateMode = false;
 }
 
 void setup() {
-  pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
-
-  // Проверка диагностики: удерживается ли Пуск2?
-  delay(50);  // дать стабилизироваться
-  if (digitalRead(START2_BUTTON_PIN) == LOW) {
-    g_isDiagnosticMode = true;
-  }
-
   ui_init();
   relays_init();
   app_state_init();
   modes_init();
-  display_init(g_isDiagnosticMode);
+
+  if (ui_isStart1Held()) {
+    g_isCalibrateMode = true;
+  } else if (ui_isStart2Held()) {
+    g_isDiagnosticMode = true;
+  }
+
+  display_init(g_isDiagnosticMode, g_isCalibrateMode);
   ui_runStartupAnimation();
+  current_setMidPoint();
   delay(STARTUP_TIMEOUT);
+  calibration_load();
   ui_clearLEDs();
   display_clear();
 }
@@ -37,10 +38,19 @@ void loop() {
   static unsigned long lastDisplayTime = 0;
   static unsigned long lastPotTime = 0;
   static unsigned long lastCurrentTime = 0;
+  static Mode currMode = MODE_MANUAL_BLOCKING;
+  static float current = 0.0f;
+  static bool isGroupA = true;
 
-  if (g_isDiagnosticMode) {
+  if (g_isCalibrateMode || g_isDiagnosticMode) {
+    if (g_isCalibrateMode) {
+      ui_updateButtons();
+      if (ui_StopPressed()) calibration_save();
+    }
+
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
-      display_showDiagnostic();
+      if (g_isCalibrateMode) calibration_run();
+      if (g_isDiagnosticMode) diagnostic_run();
       lastDisplayTime = millis();
     }
     return;

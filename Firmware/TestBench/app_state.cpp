@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include "app_state.h"
 #include "relays.h"
 #include "config.h"
@@ -31,6 +32,25 @@ inline unsigned long mapFast(int x, int in_min, int in_max, unsigned long out_mi
   }
   return (unsigned long)((x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min);
 }
+
+// Кэш калибровки
+uint16_t g_calMinOn1 = 0, g_calMinD1 = 0, g_calMinOn2 = 0, g_calMinD2 = 0, g_calMinCycles = 0;
+
+void loadCalibrationFromEEPROM() {
+  auto readWord = [](int addr) -> uint16_t {
+    return EEPROM.read(addr) | (EEPROM.read(addr + 1) << 8);
+  };
+
+  g_calMinOn1 = readWord(0);
+  g_calMinD1 = readWord(2);
+  g_calMinOn2 = readWord(4);
+  g_calMinD2 = readWord(6);
+  g_calMinCycles = readWord(8);
+
+  if (g_calMinOn1 == 0xFFFF) {
+    g_calMinOn1 = g_calMinD1 = g_calMinOn2 = g_calMinD2 = g_calMinCycles = 0;
+  }
+}
 }
 
 // =========================================================
@@ -39,6 +59,7 @@ void app_state_init() {
   pinMode(MODE0_SWITCH_PIN, INPUT_PULLUP);
   pinMode(MODE1_SWITCH_PIN, INPUT_PULLUP);
   pinMode(GROUP_SWITCH_PIN, INPUT_PULLUP);
+  loadCalibrationFromEEPROM();
 }
 
 // =========================================================
@@ -65,11 +86,30 @@ void app_state_update() {
   const bool minDelayRequired = (!s_groupA) || (s_mode == MODE_ASYNC_AUTO);
 
   // 1️⃣ Считываем "сырые" значения АЦП
-  int adc_on1 = analogRead(POT_ON1_PIN);
-  int adc_d1 = analogRead(POT_DELAY1_PIN);
-  int adc_on2 = analogRead(POT_ON2_PIN);
-  int adc_d2 = analogRead(POT_DELAY2_PIN);
-  int adc_cycles = analogRead(POT_CYCLES_PIN);
+  int adc_on1_raw = analogRead(POT_ON1_PIN);
+  int adc_on1 = adc_on1_raw - g_calMinOn1;
+  if (adc_on1 < 0) adc_on1 = 0;
+  if (adc_on1 > 1023) adc_on1 = 1023;
+
+  int adc_d1_raw = analogRead(POT_DELAY1_PIN);
+  int adc_d1 = adc_d1_raw - g_calMinD1;
+  if (adc_d1 < 0) adc_d1 = 0;
+  if (adc_d1 > 1023) adc_d1 = 1023;
+
+  int adc_on2_raw = analogRead(POT_ON2_PIN);
+  int adc_on2 = adc_on2_raw - g_calMinOn2;
+  if (adc_on2 < 0) adc_on2 = 0;
+  if (adc_on2 > 1023) adc_on2 = 1023;
+
+  int adc_d2_raw = analogRead(POT_DELAY2_PIN);
+  int adc_d2 = adc_d2_raw - g_calMinD2;
+  if (adc_d2 < 0) adc_d2 = 0;
+  if (adc_d2 > 1023) adc_d2 = 1023;
+
+  int adc_cycles_raw = analogRead(POT_CYCLES_PIN);
+  int adc_cycles = adc_cycles_raw - g_calMinD2;
+  if (adc_cycles < 0) adc_cycles = 0;
+  if (adc_cycles > 1023) adc_cycles = 1023;
 
   // 2️⃣ Сглаживаем (EMA)
   f_on1 = smooth(f_on1, adc_on1);
