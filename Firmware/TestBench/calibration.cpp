@@ -203,7 +203,7 @@ void calibration_run() {
   }
 
   // Автоматический переход после SAVED
-  if (s_state == CAL_SAVE && millis() - s_savedTime >= 1500) {
+  if (s_state == CAL_SAVE && millis() - s_savedTime >= SHOW_SAVE_CALIB_TIMEOUT) {
     s_state = CAL_RIGHT;
     s_instructionsDrawn = false;
   }
@@ -226,9 +226,8 @@ void calibration_save() {
   bool valid = true;
 
   if (s_state == CAL_LEFT) {
-    // Проверка: все < 200
     for (int i = 0; i < 5; i++) {
-      if (raw[i] >= 200) {
+      if (raw[i] >= POT_MIN_CALIB) {
         valid = false;
         break;
       }
@@ -262,9 +261,8 @@ void calibration_save() {
     s_state = CAL_SAVE;
 
   } else if (s_state == CAL_RIGHT) {
-    // Проверка: все > 800
     for (int i = 0; i < 5; i++) {
-      if (raw[i] <= 800) {
+      if (raw[i] <= POT_MAX_CALIB) {
         valid = false;
         break;
       }
