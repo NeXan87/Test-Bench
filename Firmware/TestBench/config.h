@@ -112,4 +112,6 @@
 #define MAX_DISPLAY_TIME_MM 59
 #define MAX_DISPLAY_TIME_SS 59
 
+#define POT_ALPHA 0.3f // Коэффициент обновления потенциометров. Чем меньше значение, тем быстрее
+
 #endif

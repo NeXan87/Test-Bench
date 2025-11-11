@@ -22,7 +22,7 @@ inline unsigned long ensureMin(unsigned long val, unsigned long minVal) {
   return (val < minVal) ? minVal : val;
 }
 
-inline float smooth(float prev, int raw, float alpha = 0.7f) {
+inline float smooth(float prev, int raw, float alpha = POT_ALPHA) {
   return prev * alpha + raw * (1.0f - alpha);
 }
 
