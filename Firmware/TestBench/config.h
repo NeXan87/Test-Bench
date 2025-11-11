@@ -31,12 +31,17 @@
 #define POT_DELAY2_PIN A1  // Задержка после реле 2/4
 #define POT_CYCLES_PIN A0  // Количество циклов
 
-// Адреса минимальных значений потенциометров в EEPROM (10 байт: 5 * uint16_t)
-#define ADDR_ON1_MIN 0
-#define ADDR_D1_MIN 2
-#define ADDR_ON2_MIN 4
-#define ADDR_D2_MIN 6
-#define ADDR_CYCLES_MIN 8
+// Адреса минимальных и максимальных значений потенциометров в EEPROM (10 байт: 5 * uint16_t)
+#define ADDR_ON1_MIN     0
+#define ADDR_ON1_MAX     2
+#define ADDR_D1_MIN      4
+#define ADDR_D1_MAX      6
+#define ADDR_ON2_MIN     8
+#define ADDR_ON2_MAX    10
+#define ADDR_D2_MIN     12
+#define ADDR_D2_MAX     14
+#define ADDR_CYCLES_MIN 16
+#define ADDR_CYCLES_MAX 18
 
 // Датчик тока
 #define CURRENT_SENSOR_PIN A7  // Датчик постоянного тока
@@ -99,6 +104,8 @@
 #define STARTUP_TIMEOUT 1500         // Длительность отображения заставки при включении
 #define BRAKE_LED_INTERVAL 1000     // Частота мигания светодиода в ожидании появления тока
 #define BRAKE_FAST_INTERVAL 500      // Частота мигания светодиода в ожидании включения двигателя
+#define SHOW_SAVE_CALIB_TIMEOUT 1500      // Время отображения сообщения о успешном сохранении данных калибровки потенциометров
+#define SHOW_ERROR_CALIB_TIMEOUT 2000      // Время отображения сообщения о ошибке позиции при калибровки потенциометров
 
 // =============== ВРЕМЯ ЦИКЛА ===============
 #define MAX_DISPLAY_TIME_HH 99

@@ -33,11 +33,11 @@ const char* utils_formatCycleTime(unsigned long elapsedMs, char* buffer, size_t 
   return buffer;
 }
 
-void utils_setChars(uint8_t row, uint8_t col, int value, bool isClean = false) {
-  lcd.setCursor(row, col);
+void utils_setChars(uint8_t col, uint8_t row, int value, bool isClean = false) {
+  lcd.setCursor(col, row);
   if (isClean) {
-    lcd.print(F("    "));
-    lcd.setCursor(row, col);
+    lcd.print(F("    "));      // очистить 4 символа
+    lcd.setCursor(col, row);   // вернуть курсор
   }
   lcd.print(value);
 }

@@ -45,7 +45,7 @@ void loop() {
   if (g_isCalibrateMode || g_isDiagnosticMode) {
     if (g_isCalibrateMode) {
       ui_updateButtons();
-      if (ui_StopPressed()) calibration_save();
+      if (ui_StopPressed() && !calibration_isSaving()) calibration_save();
     }
 
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
