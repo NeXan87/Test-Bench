@@ -13,7 +13,7 @@ bool g_isOverload = false;
 }
 
 void current_setMidPoint() {
-  sensor.setMidPoint(512);
+  sensor.setMidPoint(ACS_MID_POINT);
 }
 
 float current_readDC() {
