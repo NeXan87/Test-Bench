@@ -13,7 +13,8 @@ bool g_isOverload = false;
 }
 
 void current_setMidPoint() {
-  sensor.setMidPoint(ACS_MID_POINT);
+  int currentRaw = analogRead(CURRENT_SENSOR_PIN);
+  sensor.setMidPoint(currentRaw);
 }
 
 float current_readDC() {

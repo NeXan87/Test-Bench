@@ -23,11 +23,12 @@ void setup() {
     g_isCalibrateMode = true;
   } else if (ui_isStart2Held()) {
     g_isDiagnosticMode = true;
+  } else {
+    current_setMidPoint();
   }
 
   display_init(g_isDiagnosticMode, g_isCalibrateMode);
   ui_runStartupAnimation();
-  current_setMidPoint();
   delay(STARTUP_TIMEOUT);
   calibration_load();
   ui_clearLEDs();
