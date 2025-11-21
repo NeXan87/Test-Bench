@@ -84,10 +84,10 @@ void app_state_update() {
   unsigned long raw_relay1 = mapFast((int)f_on1, 0, 1023, MIN_ON_RELAY1_TIME, MAX_ON_RELAY1_TIME) * 1000;
   unsigned long raw_relay2 = 0, raw_delay1 = 0, raw_delay2 = 0;
 
-  if (s_mode == MODE_SYNC_AUTO) {
-    raw_relay2 = mapFast((int)f_on2, 0, 1023, MIN_ON_RELAY2_TIME_SYNC, MAX_ON_RELAY2_TIME) * 1000;
-  } else {
+  if (s_mode == MODE_ASYNC_AUTO) {
     raw_relay2 = mapFast((int)f_on2, 0, 1023, MIN_ON_RELAY2_TIME_ASYNC, MAX_ON_RELAY2_TIME) * 1000;
+  } else {
+    raw_relay2 = mapFast((int)f_on2, 0, 1023, MIN_ON_RELAY2_TIME_SYNC, MAX_ON_RELAY2_TIME) * 1000;
   }
 
   if (minDelayRequired) {
@@ -106,12 +106,12 @@ void app_state_update() {
   s_relay1 = raw_relay1;
   s_delay1 = raw_delay1;
 
-  if (s_mode == MODE_SYNC_AUTO) {
-    s_relay2 = raw_relay2 < 1000 ? 0 : raw_relay2;
-    s_delay2 = raw_relay2 < 1000 ? 0 : raw_delay2;
-  } else {
+  if (s_mode == MODE_ASYNC_AUTO) {
     s_relay2 = raw_relay2;
     s_delay2 = raw_delay2;
+  } else {
+    s_relay2 = raw_relay2 < 1000 ? 0 : raw_relay2;
+    s_delay2 = raw_relay2 < 1000 ? 0 : raw_delay2;
   }
 
   // 5️⃣ Потенциометр циклов
