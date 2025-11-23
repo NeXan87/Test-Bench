@@ -11,7 +11,7 @@ enum Mode { MODE_MANUAL_BLOCKING = 1,
 
 void app_state_init();
 void app_state_update();
-bool app_state_readSwitches();
+void app_state_readSwitches();
 
 Mode app_state_getMode();
 bool app_state_getGroupA();

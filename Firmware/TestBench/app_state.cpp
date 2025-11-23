@@ -45,20 +45,19 @@ void app_state_init() {
 
 // =========================================================
 // --- Чтение переключателей режима/группы ---
-bool app_state_readSwitches() {
+void app_state_readSwitches() {
   const bool m0 = !digitalRead(MODE0_SWITCH_PIN);
   const bool m1 = !digitalRead(MODE1_SWITCH_PIN);
 
   // Комбинации двух переключателей (2 бита)
   switch ((m1 << 1) | m0) {
     case 0b00: s_mode = MODE_MANUAL_BLOCKING; break;
+    case 0b11: s_mode = MODE_MANUAL_INDEPENDENT; break;
     case 0b01: s_mode = MODE_SYNC_AUTO; break;
     case 0b10: s_mode = MODE_ASYNC_AUTO; break;
-    case 0b11: s_mode = MODE_MANUAL_INDEPENDENT; break;
   }
 
   s_groupA = !digitalRead(GROUP_SWITCH_PIN);  // LOW = группа A
-  return true;
 }
 
 // =========================================================
