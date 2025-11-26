@@ -6,7 +6,7 @@
 Универсальный тестовый стенд для проверки реле, двигателей, воздушных клапанов и другого промышленного оборудования с поддержкой ручного и автоматического режимов работы.
 
 💾 Скачать [Руководство по эксплуатации](https://github.com/NeXan87/Test-Bench/blob/main/Manual.docx?raw=true)!<br/>
-📷 Открыть [галерею с фото](https://github.com/NeXan87/Test-Bench/tree/main/Gallery)
+📷 Открыть [галерею с фото](https://github.com/NeXan87/Test-Bench/tree/main/Gallery).
 
 ## 🔧 Основные возможности
 
