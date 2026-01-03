@@ -2,9 +2,11 @@
 #define RELAYS_H
 
 #include <Arduino.h>
+
 #include "config.h"
 
-enum RelayGroup { GROUP_A, GROUP_B };
+enum RelayGroup { GROUP_A,
+                  GROUP_B };
 
 void relays_init();
 void relays_setGroup(RelayGroup group);
