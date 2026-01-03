@@ -15,13 +15,13 @@ constexpr uint8_t LED_COUNT = sizeof(LED_PINS);
 
 void ui_init() {
   // Кнопки
-  pinMode(START1_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(START2_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(START1_BUTTON_PIN, INPUT);
+  pinMode(START2_BUTTON_PIN, INPUT);
+  pinMode(STOP_BUTTON_PIN, INPUT);
 
-  g_btn1.attach(START1_BUTTON_PIN, INPUT_PULLUP);
-  g_btn2.attach(START2_BUTTON_PIN, INPUT_PULLUP);
-  g_btnStop.attach(STOP_BUTTON_PIN, INPUT_PULLUP);
+  g_btn1.attach(START1_BUTTON_PIN, INPUT);
+  g_btn2.attach(START2_BUTTON_PIN, INPUT);
+  g_btnStop.attach(STOP_BUTTON_PIN, INPUT);
 
   g_btn1.interval(25);
   g_btn2.interval(25);

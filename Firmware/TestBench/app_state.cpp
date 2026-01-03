@@ -38,9 +38,9 @@ inline unsigned long mapFast(int x, int in_min, int in_max, unsigned long out_mi
 // =========================================================
 // --- Инициализация ---
 void app_state_init() {
-  pinMode(MODE0_SWITCH_PIN, INPUT_PULLUP);
-  pinMode(MODE1_SWITCH_PIN, INPUT_PULLUP);
-  pinMode(GROUP_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(MODE0_SWITCH_PIN, INPUT);
+  pinMode(MODE1_SWITCH_PIN, INPUT);
+  pinMode(GROUP_SWITCH_PIN, INPUT);
 }
 
 // =========================================================

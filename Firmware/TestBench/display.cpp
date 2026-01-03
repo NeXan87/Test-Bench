@@ -1,6 +1,5 @@
-
-#include "display.h"
 #include "config.h"
+#include "display.h"
 #include "utils.h"
 #include "modes.h"
 
